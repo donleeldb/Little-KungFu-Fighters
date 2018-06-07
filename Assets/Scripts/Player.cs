@@ -17,12 +17,15 @@ public class Player : MonoBehaviour {
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
-	private Animator anim;
+	private PlayerState playerState;
+
+	private PlayerAnimator anim;
 
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
-		anim = GetComponentInChildren<Animator> ();
+		anim = GetComponentInChildren<PlayerAnimator> ();
+		playerState = new PlayerState ();
 		facingRight = true;
 	}
 	
@@ -35,31 +38,49 @@ public class Player : MonoBehaviour {
 		// TODO: change Vertical to sth else
 		inputDirection_z = Input.GetAxis ("Depth") * speed;
 
+		if (Input.GetKeyUp (KeyCode.L)) {
+			anim.StopDefend ();
+		}
+
+		print (verticalVelocity);
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
-			Debug.Log ("grounded");
+
 			if (inputDirection_x == 0 && inputDirection_z == 0) {
-				anim.SetInteger ("State", 0);
+				anim.Idle ();
+				playerState.SetState (PLAYERSTATE.IDLE);
 			} else {
-				anim.SetInteger ("State", 1);
+				anim.Walk();
+				playerState.SetState(PLAYERSTATE.MOVING);
 			}
+				
+
 
 //			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
-			if (Input.GetKeyDown (KeyCode.Space)) {
+			if (Input.GetKeyDown (KeyCode.K)) {
 				verticalVelocity = 15;
-				anim.SetInteger ("State", 2);
+				anim.Jump ();
+				playerState.SetState (PLAYERSTATE.JUMPING);
+			} else if (Input.GetKeyDown (KeyCode.J)) {
+				anim.Punch (0);
+				playerState.SetState (PLAYERSTATE.PUNCH);
+			} else if (Input.GetKeyDown (KeyCode.L)) {
+				anim.StartDefend ();
+				playerState.SetState (PLAYERSTATE.DEFENDING);
+			} else {
+				moveVector.x = inputDirection_x;
+				moveVector.z = inputDirection_z;
 			}
-			moveVector.x = inputDirection_x;
-			moveVector.z = inputDirection_z;
+
+
 
 		} else {
-			Debug.Log ("not grounded");
 			verticalVelocity -= gravity;
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 		}
 
-		print(verticalVelocity);
+
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
 		Flip (moveVector.x);
@@ -100,4 +121,18 @@ public class Player : MonoBehaviour {
 		}
 	
 	}
+
+	void OnControllerColliderHit(ControllerColliderHit hit)
+	{
+		if (hit.gameObject.tag == "fighter") {
+			Physics.IgnoreCollision (hit.gameObject.GetComponent<CharacterController> (), controller);
+		}
+	}
+
+	public void Ready() {
+		anim.Idle ();
+		playerState.SetState (PLAYERSTATE.IDLE);
+
+	}
+
 }

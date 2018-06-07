@@ -5,7 +5,6 @@ using UnityEngine;
 public class CameraMotor : MonoBehaviour {
 
 	public Transform lookAt;
-	private Vector3 offset = new Vector3 (0, 0, -15.0f);
 	// Use this for initialization
 	void Start () {
 		
@@ -13,6 +12,7 @@ public class CameraMotor : MonoBehaviour {
 	
 	// Update is called once per frame
 	void LateUpdate () {
-		transform.position = lookAt.transform.position + offset;
+		Vector3 newPos = new Vector3 (lookAt.transform.position.x, transform.position.y, transform.position.z);
+		transform.position = newPos;
 	}
 }
