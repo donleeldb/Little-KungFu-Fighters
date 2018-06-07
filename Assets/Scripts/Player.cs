@@ -40,36 +40,44 @@ public class Player : MonoBehaviour {
 
 		if (Input.GetKeyUp (KeyCode.L)) {
 			anim.StopDefend ();
+			playerState.SetState (PLAYERSTATE.IDLE);
 		}
 
-		print (verticalVelocity);
+
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-			if (inputDirection_x == 0 && inputDirection_z == 0) {
-				anim.Idle ();
-				playerState.SetState (PLAYERSTATE.IDLE);
-			} else {
-				anim.Walk();
-				playerState.SetState(PLAYERSTATE.MOVING);
-			}
-				
+
+			print (playerState.currentState);
+			if (playerState.currentState != PLAYERSTATE.DEFENDING) {
+				if (inputDirection_x == 0 && inputDirection_z == 0) {
+					anim.Idle ();
+					playerState.SetState (PLAYERSTATE.IDLE);
+				} else {
+					anim.Walk ();
+					playerState.SetState (PLAYERSTATE.MOVING);
+				}
+				//			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
 
 
-//			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
-			if (Input.GetKeyDown (KeyCode.K)) {
-				verticalVelocity = 15;
-				anim.Jump ();
-				playerState.SetState (PLAYERSTATE.JUMPING);
-			} else if (Input.GetKeyDown (KeyCode.J)) {
-				anim.Punch (0);
-				playerState.SetState (PLAYERSTATE.PUNCH);
-			} else if (Input.GetKeyDown (KeyCode.L)) {
-				anim.StartDefend ();
-				playerState.SetState (PLAYERSTATE.DEFENDING);
-			} else {
+				if (Input.GetKeyDown (KeyCode.K)) {
+					verticalVelocity = 15;
+					anim.Jump ();
+					playerState.SetState (PLAYERSTATE.JUMPING);
+				} else if (Input.GetKeyDown (KeyCode.J)) {
+					anim.Punch (0);
+					playerState.SetState (PLAYERSTATE.PUNCH);
+				} else if (Input.GetKeyDown (KeyCode.L)) {
+					anim.StartDefend ();
+					playerState.SetState (PLAYERSTATE.DEFENDING);
+				}
+
 				moveVector.x = inputDirection_x;
 				moveVector.z = inputDirection_z;
+			} else {
+				if (Input.GetKeyDown (KeyCode.J) && Input.GetKeyDown(KeyCode.W)) {
+					print("Tornado");
+				}
 			}
 
 

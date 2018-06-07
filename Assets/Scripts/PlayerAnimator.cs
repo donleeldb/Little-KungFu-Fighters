@@ -21,10 +21,11 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Punch(int id) {
 		animator.SetTrigger ("Punch" + id);
-		StartCoroutine (WaitForAnimationFinish ("Punch" + id));
+		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));
 	}
 
 	public void StartDefend() {		
+		animator.SetBool("Walk", false);
 		animator.SetBool ("Defend", true);
 	}
 
