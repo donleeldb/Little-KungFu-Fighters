@@ -18,8 +18,12 @@ public class Player : MonoBehaviour {
 	private CharacterController controller;
 
 	private PlayerState playerState;
-
 	private PlayerAnimator anim;
+
+
+	private int attackNum = 0; //the current attack number
+	private bool continuePunchCombo; //true if a punch combo needs to continue
+	private float LastAttackTime = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -35,7 +39,6 @@ public class Player : MonoBehaviour {
 		moveVector = Vector3.zero;
 
 		inputDirection_x = Input.GetAxis ("Horizontal") * speed;
-		// TODO: change Vertical to sth else
 		inputDirection_z = Input.GetAxis ("Depth") * speed;
 
 		if (Input.GetKeyUp (KeyCode.L)) {
@@ -47,29 +50,39 @@ public class Player : MonoBehaviour {
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-
-			print (playerState.currentState);
+			// When defending, you can't do anything else
 			if (playerState.currentState != PLAYERSTATE.DEFENDING) {
-				if (inputDirection_x == 0 && inputDirection_z == 0) {
-					anim.Idle ();
-					playerState.SetState (PLAYERSTATE.IDLE);
-				} else {
-					anim.Walk ();
-					playerState.SetState (PLAYERSTATE.MOVING);
-				}
+				
 				//			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
-
 
 				if (Input.GetKeyDown (KeyCode.K)) {
 					verticalVelocity = 15;
 					anim.Jump ();
 					playerState.SetState (PLAYERSTATE.JUMPING);
 				} else if (Input.GetKeyDown (KeyCode.J)) {
-					anim.Punch (0);
-					playerState.SetState (PLAYERSTATE.PUNCH);
+					print (playerState.currentState);
+
+					if (playerState.currentState != PLAYERSTATE.PUNCH) {
+						playerState.SetState (PLAYERSTATE.PUNCH);
+						anim.Punch (0);
+					} else {
+						print ("print combo true");
+						continuePunchCombo = true;
+						if (attackNum == 2)
+							continuePunchCombo = false;
+					}
+
 				} else if (Input.GetKeyDown (KeyCode.L)) {
 					anim.StartDefend ();
 					playerState.SetState (PLAYERSTATE.DEFENDING);
+				} else if (inputDirection_x == 0 && inputDirection_z == 0) {
+					if (playerState.currentState != PLAYERSTATE.PUNCH) {
+						anim.Idle ();
+						playerState.SetState (PLAYERSTATE.IDLE);
+					}
+				} else {
+					anim.Walk ();
+					playerState.SetState (PLAYERSTATE.MOVING);
 				}
 
 				moveVector.x = inputDirection_x;
@@ -80,15 +93,12 @@ public class Player : MonoBehaviour {
 				}
 			}
 
-
-
 		} else {
 			verticalVelocity -= gravity;
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 		}
-
-
+			
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
 		Flip (moveVector.x);
@@ -138,9 +148,44 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Ready() {
-		anim.Idle ();
-		playerState.SetState (PLAYERSTATE.IDLE);
+		print("ready");
+		print(playerState.currentState);
+		if (continuePunchCombo) {
+			doPunchAttack ();
+			continuePunchCombo = false;
+				
+		} else {
+			print ("shouldnt be here");
+			attackNum = 0;
+			anim.Idle ();
+			playerState.SetState (PLAYERSTATE.IDLE);
 
+		}
+
+	}
+
+	//returns the next attack number in the combo chain
+	private int GetNextAttackNum() {
+		if (playerState.currentState == PLAYERSTATE.PUNCH) {
+//			attackNum = Mathf.Clamp (attackNum += 1, 0, PunchAttackData.Length - 1);
+//			if (Time.time - LastAttackTime > KickAttackData [attackNum].comboResetTime || !targetHit)
+
+			attackNum = Mathf.Clamp (attackNum + 1, 0, 2); // it's not clamping but if num greater than 2 animator fails.
+			print (attackNum);
+
+			return attackNum;
+
+		} 
+		return 0;
+	}
+
+	//do a punch attack
+	private void doPunchAttack() {
+		playerState.SetState (PLAYERSTATE.PUNCH);
+		anim.Punch (GetNextAttackNum ());
+		if (attackNum == 2)
+			continuePunchCombo = false;
+		LastAttackTime = Time.time;
 	}
 
 }

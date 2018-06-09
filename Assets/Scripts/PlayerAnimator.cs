@@ -21,6 +21,7 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Punch(int id) {
 		animator.SetTrigger ("Punch" + id);
+		animator.ResetTrigger("Idle");
 		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));
 	}
 
