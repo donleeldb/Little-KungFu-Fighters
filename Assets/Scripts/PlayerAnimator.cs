@@ -17,9 +17,12 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Walk() {
 		animator.SetBool("Walk", true);
+		animator.ResetTrigger("Punch1");
+		animator.ResetTrigger("Punch2");
 	}
 
 	public void Punch(int id) {
+		animator.SetBool("Walk", false);
 		animator.SetTrigger ("Punch" + id);
 		animator.ResetTrigger("Idle");
 		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));

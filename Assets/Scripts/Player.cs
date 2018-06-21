@@ -24,6 +24,8 @@ public class Player : MonoBehaviour {
 	private int attackNum = 0; //the current attack number
 	private bool continuePunchCombo; //true if a punch combo needs to continue
 	private float LastAttackTime = 0;
+	private bool targetHit; //true if the last hit has hit a target
+
 
 	// Use this for initialization
 	void Start () {
@@ -51,12 +53,22 @@ public class Player : MonoBehaviour {
 //		if (IsControllerGrounded()) { // mine is bugged
 
 			// When defending, you can't do anything else
-			if (playerState.currentState != PLAYERSTATE.DEFENDING) {
+			if (playerState.currentState == PLAYERSTATE.DEFENDING) {
+				anim.StartDefend ();
+				if (Input.GetKeyDown (KeyCode.J) && Input.GetKeyDown(KeyCode.W)) {
+					print("Tornado");
+				}
+
+			} else if (playerState.currentState == PLAYERSTATE.PUNCH) {
+				
+			} else {
 				
 				//			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
 
 				if (Input.GetKeyDown (KeyCode.K)) {
 					verticalVelocity = 15;
+					moveVector.x = inputDirection_x;
+					moveVector.z = inputDirection_z;
 					anim.Jump ();
 					playerState.SetState (PLAYERSTATE.JUMPING);
 				} else if (Input.GetKeyDown (KeyCode.J)) {
@@ -83,13 +95,8 @@ public class Player : MonoBehaviour {
 				} else {
 					anim.Walk ();
 					playerState.SetState (PLAYERSTATE.MOVING);
-				}
-
-				moveVector.x = inputDirection_x;
-				moveVector.z = inputDirection_z;
-			} else {
-				if (Input.GetKeyDown (KeyCode.J) && Input.GetKeyDown(KeyCode.W)) {
-					print("Tornado");
+					moveVector.x = inputDirection_x;
+					moveVector.z = inputDirection_z;
 				}
 			}
 
@@ -97,6 +104,10 @@ public class Player : MonoBehaviour {
 			verticalVelocity -= gravity;
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
+
+			if (Input.GetKeyDown (KeyCode.L)) {
+				playerState.SetState (PLAYERSTATE.DEFENDING);
+			}
 		}
 			
 		moveVector.y = verticalVelocity;
@@ -185,7 +196,69 @@ public class Player : MonoBehaviour {
 		anim.Punch (GetNextAttackNum ());
 		if (attackNum == 2)
 			continuePunchCombo = false;
-		LastAttackTime = Time.time;
+//		LastAttackTime = Time.time; // not using this rn
+	}
+
+	//checks if we have hit something (animation event)
+	public void CheckForHit() {
+		int dir = -1;
+		if (facingRight) {
+			dir = 1;
+		}
+		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+		LayerMask fighterLayerMask = LayerMask.NameToLayer ("fighter");
+//		LayerMask itemLayerMask = LayerMask.NameToLayer ("Item");
+
+		//do a raycast to see which enemies/objects are in attack range
+//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
+		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
+		Debug.DrawRay (playerPos, Vector3.right * dir);
+		RaycastHit[] hits = Physics.SphereCastAll (playerPos, 0.5f, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask);
+		Debug.DrawRay (playerPos, Vector3.right * dir, Color.red, getAttackRange());
+
+		//we have hit something
+		for (int i = 0; i < hits.Length; i++) {
+
+			LayerMask layermask = hits [i].collider.gameObject.layer;
+
+			//we have hit an enemy
+			if (layermask == fighterLayerMask) {
+				GameObject enemy = hits [i].collider.gameObject;
+
+//				DealDamageToEnemy (hits [i].collider.gameObject);
+				print("hit");
+				targetHit = true;
+	
+			}
+
+//			//we have hit an item
+//			if (layermask == itemLayerMask) {
+//				GameObject item = hits [i].collider.gameObject;
+//				if (ObjInYRange (item)) {
+//					item.GetComponent<ItemInteractable> ().ActivateItem (gameObject);
+//					ShowHitEffectAtPosition (hits [i].point);
+//				}
+//			}
+		}
+
+		//we havent hit anything
+		if(hits.Length == 0){ 
+			targetHit = false;
+		}
+	}
+
+	//returns the attack range of the current attack
+	private float getAttackRange() {
+//		if (playerState.currentState == PLAYERSTATE.PUNCH && attackNum <= PunchAttackData.Length) {
+//			return PunchAttackData [attackNum].range;
+//		} else if (playerState.currentState == PLAYERSTATE.KICK && attackNum <= KickAttackData.Length) {
+//			return KickAttackData [attackNum].range;
+//		} else if(jumpKickActive){
+//			return JumpKickData.range;
+//		} else {
+//			return 0f;
+//		}
+		return 0.5f;
 	}
 
 }
