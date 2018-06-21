@@ -10,16 +10,25 @@ public class NPC : MonoBehaviour {
 
 	private bool facingRight;
 
+	private PlayerState playerState;
+
 	private Vector3 moveVector;
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
-	private Animator anim;
+	private PlayerAnimator anim;
+
+	private int attackNum = 0; //the current attack number
+	private bool continuePunchCombo; //true if a punch combo needs to continue
+	private float LastAttackTime = 0;
+
+
 
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
-		anim = GetComponentInChildren<Animator> ();
+		anim = GetComponentInChildren<PlayerAnimator> ();
+		playerState = new PlayerState ();
 		facingRight = true;
 	}
 
@@ -74,4 +83,16 @@ public class NPC : MonoBehaviour {
 		}
 
 	}
+
+	public void Ready() {
+		print("ready");
+		print(playerState.currentState);
+
+		attackNum = 0;
+		anim.Idle ();
+		playerState.SetState (PLAYERSTATE.IDLE);
+
+
+	}
+
 }

@@ -19,19 +19,15 @@ public class Player : MonoBehaviour {
 
 	private PlayerState playerState;
 	private PlayerAnimator anim;
-
-
-	private int attackNum = 0; //the current attack number
-	private bool continuePunchCombo; //true if a punch combo needs to continue
-	private float LastAttackTime = 0;
-	private bool targetHit; //true if the last hit has hit a target
+	private Action action;
 
 
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
 		anim = GetComponentInChildren<PlayerAnimator> ();
-		playerState = new PlayerState ();
+		action = GetComponent<Action> ();
+		playerState = GetComponent<PlayerState> ();
 		facingRight = true;
 	}
 	
@@ -43,47 +39,39 @@ public class Player : MonoBehaviour {
 		inputDirection_x = Input.GetAxis ("Horizontal") * speed;
 		inputDirection_z = Input.GetAxis ("Depth") * speed;
 
+		//STOPDEFENDING is a character action
 		if (Input.GetKeyUp (KeyCode.L)) {
-			anim.StopDefend ();
-			playerState.SetState (PLAYERSTATE.IDLE);
+			action.StopDefend ();
 		}
-
 
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
 			// When defending, you can't do anything else
 			if (playerState.currentState == PLAYERSTATE.DEFENDING) {
-				anim.StartDefend ();
+				action.StartDefend ();
 				if (Input.GetKeyDown (KeyCode.J) && Input.GetKeyDown(KeyCode.W)) {
 					print("Tornado");
 				}
 
-			} else if (playerState.currentState == PLAYERSTATE.PUNCH) {
+			} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
+				if (Input.GetKeyDown (KeyCode.J)) {
+					print (playerState.currentState);
+					action.ContinuePunch ();
+				}
+			} else { // right now is idle, walk
 				
-			} else {
-				
-				//			verticalVelocity = 0; // tutorial has this. But vertical velocity is reset in the else statement
-
 				if (Input.GetKeyDown (KeyCode.K)) {
 					verticalVelocity = 15;
 					moveVector.x = inputDirection_x;
 					moveVector.z = inputDirection_z;
 					anim.Jump ();
 					playerState.SetState (PLAYERSTATE.JUMPING);
-				} else if (Input.GetKeyDown (KeyCode.J)) {
+				} else if (Input.GetKeyDown (KeyCode.J)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
+					// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
 					print (playerState.currentState);
 
-					if (playerState.currentState != PLAYERSTATE.PUNCH) {
-						playerState.SetState (PLAYERSTATE.PUNCH);
-						anim.Punch (0);
-					} else {
-						print ("print combo true");
-						continuePunchCombo = true;
-						if (attackNum == 2)
-							continuePunchCombo = false;
-					}
-
+					action.DoPunch ();
 				} else if (Input.GetKeyDown (KeyCode.L)) {
 					anim.StartDefend ();
 					playerState.SetState (PLAYERSTATE.DEFENDING);
@@ -157,108 +145,5 @@ public class Player : MonoBehaviour {
 			Physics.IgnoreCollision (hit.gameObject.GetComponent<CharacterController> (), controller);
 		}
 	}
-
-	public void Ready() {
-		print("ready");
-		print(playerState.currentState);
-		if (continuePunchCombo) {
-			doPunchAttack ();
-			continuePunchCombo = false;
-				
-		} else {
-			print ("shouldnt be here");
-			attackNum = 0;
-			anim.Idle ();
-			playerState.SetState (PLAYERSTATE.IDLE);
-
-		}
-
-	}
-
-	//returns the next attack number in the combo chain
-	private int GetNextAttackNum() {
-		if (playerState.currentState == PLAYERSTATE.PUNCH) {
-//			attackNum = Mathf.Clamp (attackNum += 1, 0, PunchAttackData.Length - 1);
-//			if (Time.time - LastAttackTime > KickAttackData [attackNum].comboResetTime || !targetHit)
-
-			attackNum = Mathf.Clamp (attackNum + 1, 0, 2); // it's not clamping but if num greater than 2 animator fails.
-			print (attackNum);
-
-			return attackNum;
-
-		} 
-		return 0;
-	}
-
-	//do a punch attack
-	private void doPunchAttack() {
-		playerState.SetState (PLAYERSTATE.PUNCH);
-		anim.Punch (GetNextAttackNum ());
-		if (attackNum == 2)
-			continuePunchCombo = false;
-//		LastAttackTime = Time.time; // not using this rn
-	}
-
-	//checks if we have hit something (animation event)
-	public void CheckForHit() {
-		int dir = -1;
-		if (facingRight) {
-			dir = 1;
-		}
-		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
-		LayerMask fighterLayerMask = LayerMask.NameToLayer ("fighter");
-//		LayerMask itemLayerMask = LayerMask.NameToLayer ("Item");
-
-		//do a raycast to see which enemies/objects are in attack range
-//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
-		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
-		Debug.DrawRay (playerPos, Vector3.right * dir);
-		RaycastHit[] hits = Physics.SphereCastAll (playerPos, 0.5f, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask);
-		Debug.DrawRay (playerPos, Vector3.right * dir, Color.red, getAttackRange());
-
-		//we have hit something
-		for (int i = 0; i < hits.Length; i++) {
-
-			LayerMask layermask = hits [i].collider.gameObject.layer;
-
-			//we have hit an enemy
-			if (layermask == fighterLayerMask) {
-				GameObject enemy = hits [i].collider.gameObject;
-
-//				DealDamageToEnemy (hits [i].collider.gameObject);
-				print("hit");
-				targetHit = true;
-	
-			}
-
-//			//we have hit an item
-//			if (layermask == itemLayerMask) {
-//				GameObject item = hits [i].collider.gameObject;
-//				if (ObjInYRange (item)) {
-//					item.GetComponent<ItemInteractable> ().ActivateItem (gameObject);
-//					ShowHitEffectAtPosition (hits [i].point);
-//				}
-//			}
-		}
-
-		//we havent hit anything
-		if(hits.Length == 0){ 
-			targetHit = false;
-		}
-	}
-
-	//returns the attack range of the current attack
-	private float getAttackRange() {
-//		if (playerState.currentState == PLAYERSTATE.PUNCH && attackNum <= PunchAttackData.Length) {
-//			return PunchAttackData [attackNum].range;
-//		} else if (playerState.currentState == PLAYERSTATE.KICK && attackNum <= KickAttackData.Length) {
-//			return KickAttackData [attackNum].range;
-//		} else if(jumpKickActive){
-//			return JumpKickData.range;
-//		} else {
-//			return 0f;
-//		}
-		return 0.5f;
-	}
-
+		
 }
