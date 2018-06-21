@@ -119,7 +119,7 @@ public class Action : MonoBehaviour {
 	}
 
 	//checks if we have hit something (animation event)
-	public void CheckForHit() {
+	private void CheckForHit() {
 		int dir = -1;
 		if (facingRight) {
 			dir = 1;
