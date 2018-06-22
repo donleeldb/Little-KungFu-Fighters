@@ -28,7 +28,7 @@ public class NPC : MonoBehaviour {
 	void Start () {
 		controller = GetComponent<CharacterController> ();
 		anim = GetComponentInChildren<PlayerAnimator> ();
-		playerState = new PlayerState ();
+		playerState = GetComponent<PlayerState> ();
 		facingRight = true;
 	}
 
@@ -36,6 +36,7 @@ public class NPC : MonoBehaviour {
 	void Update () {
 
 		moveVector = Vector3.zero;
+		print (playerState.currentState);
 
 
 		if (!controller.isGrounded) { // not reliable
@@ -81,17 +82,6 @@ public class NPC : MonoBehaviour {
 			temp.x *= -1;
 			transform.localScale = temp;
 		}
-
-	}
-
-	public void Ready() {
-		print("ready");
-		print(playerState.currentState);
-
-		attackNum = 0;
-		anim.Idle ();
-		playerState.SetState (PLAYERSTATE.IDLE);
-
 
 	}
 

@@ -11,7 +11,7 @@ public class Player : MonoBehaviour {
 	private float gravity = 1.0f;
 	private float speed = 5.0f;
 
-	private bool facingRight;
+	public bool facingRight;
 
 	private Vector3 moveVector;
 	private Vector3 lastMotion;
@@ -56,7 +56,6 @@ public class Player : MonoBehaviour {
 
 			} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
 				if (Input.GetKeyDown (KeyCode.J)) {
-					print (playerState.currentState);
 					action.ContinuePunch ();
 				}
 			} else { // right now is idle, walk
@@ -69,12 +68,13 @@ public class Player : MonoBehaviour {
 					playerState.SetState (PLAYERSTATE.JUMPING);
 				} else if (Input.GetKeyDown (KeyCode.J)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
 					// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
-					print (playerState.currentState);
 
 					action.DoPunch ();
 				} else if (Input.GetKeyDown (KeyCode.L)) {
 					anim.StartDefend ();
 					playerState.SetState (PLAYERSTATE.DEFENDING);
+				} else if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+					// do not set idle trigger
 				} else if (inputDirection_x == 0 && inputDirection_z == 0) {
 					if (playerState.currentState != PLAYERSTATE.PUNCH) {
 						anim.Idle ();

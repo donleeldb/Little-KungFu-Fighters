@@ -46,14 +46,20 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Hit() {
 		animator.SetTrigger ("Hit");
-		StartCoroutine (WaitForAnimationFinish ("Hit"));
+		StartCoroutine (WaitForAnimationFinish ("PlayerHit"));
+	}
+
+	public void KnockDown() {
+		animator.SetTrigger ("KnockDown");
+		animator.ResetTrigger("Idle");
+		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
 	}
 
 	//on animation finish
 	IEnumerator WaitForAnimationFinish(string animName) {
 		float time = GetAnimDuration(animName);
 		yield return new WaitForSeconds(time);
-		transform.parent.GetComponent<Action>().Ready();
+		transform.parent.GetComponent<Action>().Ready(animName);
 	}
 
 	//returns the duration of an animation

@@ -23,6 +23,11 @@ public class Action : MonoBehaviour {
 	private float LastAttackTime = 0;
 	private bool targetHit; //true if the last hit has hit a target
 
+	private int HitKnockDownThreshold = 3; //the number of times the player can be hit before being knocked down
+	private int HitKnockDownCount = 0; //the number of times the player is hit in a row
+	private int HitKnockDownResetTime = 1; //the time before the hitknockdown counter resets
+	private float LastHitTime = 0; // the time when we were hit 
+
 
 	// Use this for initialization
 	void Start () {
@@ -43,7 +48,7 @@ public class Action : MonoBehaviour {
 	}
 
 	public void ContinuePunch() {
-		CheckForHit ();
+		
 		continuePunchCombo = true;
 		if (attackNum == 2)
 			continuePunchCombo = false;
@@ -55,10 +60,66 @@ public class Action : MonoBehaviour {
 		CheckForHit ();
 	}
 		
-	public void getHit() {
-		anim.Hit ();
-		print("help");
-		playerState.SetState (PLAYERSTATE.HIT);
+	public void getHit(DamageObject d) {
+
+		bool wasHit = true;
+		UpdateHitCounter ();
+		//knockdown hit
+		if (HitKnockDownCount >= HitKnockDownThreshold) { 
+			d.attackType = AttackType.KnockDown; 
+			HitKnockDownCount = 0;
+		}
+
+		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			wasHit = false;
+		}
+
+		//defend
+		if(playerState.currentState == PLAYERSTATE.DEFENDING){
+//			if(BlockAttacksFromBehind || isFacingTarget (d.inflictor)) wasHit = false;
+//			if(!wasHit){
+////				GlobalAudioPlayer.PlaySFX ("Defend");
+////				anim.ShowDefendEffect();
+////				anim.CamShakeSmall();
+//
+//				if(isFacingTarget(d.inflictor)){ 
+//					anim.AddForce(-1.5f);
+//				} else {
+//					anim.AddForce(1.5f);
+//				}
+//			}
+		}
+
+//		//getting hit while being in the air also causes a knockdown
+//		if(!GetComponent<PlayerMovement>().playerIsGrounded()){
+//			d.attackType = AttackType.KnockDown; 
+//			HitKnockDownCount = 0;
+//		}
+
+		//start knockDown sequence
+		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
+//			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
+//			anim.ShowHitEffect ();
+
+			if (d.attackType == AttackType.KnockDown) {
+				playerState.SetState (PLAYERSTATE.KNOCKDOWN);
+				KnockDown (d.inflictor);
+
+			} else {
+				playerState.SetState (PLAYERSTATE.HIT);
+				anim.Hit ();
+			}
+		}
+	}
+
+	//updates the hit counter
+	private void UpdateHitCounter() {
+		if (Time.time - LastHitTime < HitKnockDownResetTime) { 
+			HitKnockDownCount += 1;
+		} else {
+			HitKnockDownCount = 1;
+		}
+		LastHitTime = Time.time;
 	}
 
 	private void Flip(float speed) {
@@ -78,10 +139,14 @@ public class Action : MonoBehaviour {
 		}
 	}
 
-	public void Ready() {
-		print("ready");
-		print(playerState.currentState);
+	public void Ready(string animName) {
+		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			if (animName == "PlayerKnockDown") {
+				controller.enabled = true;
+			}
+		}
 		if (continuePunchCombo) {
+			CheckForHit ();
 			doPunchAttack ();
 			continuePunchCombo = false;
 
@@ -101,7 +166,6 @@ public class Action : MonoBehaviour {
 			//			if (Time.time - LastAttackTime > KickAttackData [attackNum].comboResetTime || !targetHit)
 
 			attackNum = Mathf.Clamp (attackNum + 1, 0, 2); // it's not clamping but if num greater than 2 animator fails.
-			print (attackNum);
 
 			return attackNum;
 
@@ -135,19 +199,16 @@ public class Action : MonoBehaviour {
 		Debug.DrawRay (controller.bounds.center, Vector3.right * dir, Color.red, getAttackRange());
 
 		//we have hit something
-		print(hits.Length);
 		for (int i = 0; i < hits.Length; i++) {
 
 			LayerMask layermask = hits [i].collider.gameObject.layer;
-			print("hit");
 			//we have hit an enemy
 			if (layermask == npcLayerMask || layermask == playerLayerMask) {
 				GameObject enemy = hits [i].collider.gameObject;
 
 				if (enemy.GetComponent<CharacterController>() != controller) {
 					//				DealDamageToEnemy (hits [i].collider.gameObject);
-					enemy.GetComponent<Action>().getHit();
-					print("hit");
+					enemy.GetComponent<Action>().getHit(new DamageObject(20, this.gameObject));
 					targetHit = true;
 				}
 
@@ -181,6 +242,52 @@ public class Action : MonoBehaviour {
 		//			return 0f;
 		//		}
 		return 0.5f;
+	}
+
+	//returns true is the player is facing the enemy
+	public bool isFacingTarget(GameObject g) {
+		int dir = -1;
+		if (facingRight) {
+			dir = 1;
+		}		if ((g.transform.position.x > transform.position.x && dir == 1) || (g.transform.position.x < transform.position.x && dir == -1))
+			return true;
+		else
+			return false;
+	}
+
+	public void KnockDown(GameObject inflictor) {
+		controller.enabled = false;
+		anim.KnockDown ();
+		float t = 0;
+		float travelSpeed = 2f;
+		Rigidbody2D rb = GetComponent<Rigidbody2D> ();
+
+		//get the direction of the attack
+		int dir = inflictor.transform.position.x > transform.position.x ? 1 : -1;
+
+		//look towards the direction of the incoming attack (should I?)
+//		GetComponent<Player>().facingRight = false;
+//		if (dir == 1) {
+//			GetComponent<Player>().facingRight = true;
+//		}
+
+//		while (t < 1) {
+//			controller.Move (moveVector * dir * travelSpeed);
+//
+//			rb.velocity = Vector2.left * dir * travelSpeed;
+//			t += Time.deltaTime;
+//			yield return 0;
+//		}
+//
+//		//stop traveling
+//		rb.velocity = Vector2.zero;
+
+
+//		do i need this if not doing force?
+//		yield return new WaitForSeconds (1);
+		//reset
+//		playerState.currentState = PLAYERSTATE.IDLE;
+//		anim.Idle ();
 	}
 
 }
