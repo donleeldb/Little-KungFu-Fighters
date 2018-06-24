@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class Action : MonoBehaviour {
 
-	private float verticalVelocity;
-	private float gravity = 1.0f;
-	private float speed = 5.0f;
-
 	private bool facingRight;
 
 	private Vector3 moveVector;
@@ -185,7 +181,7 @@ public class Action : MonoBehaviour {
 	//checks if we have hit something (animation event)
 	private void CheckForHit() {
 		int dir = -1;
-		if (facingRight) {
+		if (GetComponent<Player> ().facingRight) {
 			dir = 1;
 		}
 		Vector3 playerPos = transform.position + Vector3.up * 1.5f;

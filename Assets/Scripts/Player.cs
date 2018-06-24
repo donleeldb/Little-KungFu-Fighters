@@ -21,6 +21,17 @@ public class Player : MonoBehaviour {
 	private PlayerAnimator anim;
 	private Action action;
 
+	public KeyCode Left;
+	public KeyCode Right;
+	public KeyCode Up;
+	public KeyCode Down;
+	public KeyCode PunchKey;
+	public KeyCode JumpKey;
+	public KeyCode DefendKey;
+
+	public string horizontal = "Horizontal";
+	public string depth = "Depth";
+
 
 	// Use this for initialization
 	void Start () {
@@ -36,12 +47,16 @@ public class Player : MonoBehaviour {
 
 		moveVector = Vector3.zero;
 
-		inputDirection_x = Input.GetAxis ("Horizontal") * speed;
-		inputDirection_z = Input.GetAxis ("Depth") * speed;
+		inputDirection_x = Input.GetAxis (horizontal) * speed;
+		inputDirection_z = Input.GetAxis (depth) * speed;
 
 		//STOPDEFENDING is a character action
-		if (Input.GetKeyUp (KeyCode.L)) {
+		if (Input.GetKeyUp (DefendKey)) {
 			action.StopDefend ();
+		}
+
+		if (playerState.currentState == PLAYERSTATE.HIT ||  playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			return;
 		}
 
 		if (controller.isGrounded) { // not reliable
@@ -50,27 +65,27 @@ public class Player : MonoBehaviour {
 			// When defending, you can't do anything else
 			if (playerState.currentState == PLAYERSTATE.DEFENDING) {
 				action.StartDefend ();
-				if (Input.GetKeyDown (KeyCode.J) && Input.GetKeyDown(KeyCode.W)) {
+				if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown(Up)) {
 					print("Tornado");
 				}
 
 			} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
-				if (Input.GetKeyDown (KeyCode.J)) {
+				if (Input.GetKeyDown (PunchKey)) {
 					action.ContinuePunch ();
 				}
 			} else { // right now is idle, walk
 				
-				if (Input.GetKeyDown (KeyCode.K)) {
+				if (Input.GetKeyDown (JumpKey)) {
 					verticalVelocity = 15;
 					moveVector.x = inputDirection_x;
 					moveVector.z = inputDirection_z;
 					anim.Jump ();
 					playerState.SetState (PLAYERSTATE.JUMPING);
-				} else if (Input.GetKeyDown (KeyCode.J)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
+				} else if (Input.GetKeyDown (PunchKey)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
 					// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
 
 					action.DoPunch ();
-				} else if (Input.GetKeyDown (KeyCode.L)) {
+				} else if (Input.GetKeyDown (DefendKey)) {
 					anim.StartDefend ();
 					playerState.SetState (PLAYERSTATE.DEFENDING);
 				} else if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
@@ -93,7 +108,7 @@ public class Player : MonoBehaviour {
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 
-			if (Input.GetKeyDown (KeyCode.L)) {
+			if (Input.GetKeyDown (DefendKey)) {
 				playerState.SetState (PLAYERSTATE.DEFENDING);
 			}
 		}
