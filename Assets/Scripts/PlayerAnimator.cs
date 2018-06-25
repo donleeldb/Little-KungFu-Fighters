@@ -28,6 +28,10 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));
 	}
 
+	public void JumpKick() {
+		animator.SetTrigger ("JumpKick");
+	}
+
 	public void StartDefend() {		
 		animator.SetBool("Walk", false);
 		animator.SetBool ("Defend", true);

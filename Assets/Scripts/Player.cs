@@ -108,6 +108,10 @@ public class Player : MonoBehaviour {
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 
+			if (Input.GetKeyDown (PunchKey)) { 
+				action.DoJumpKick ();
+			}
+
 			if (Input.GetKeyDown (DefendKey)) {
 				playerState.SetState (PLAYERSTATE.DEFENDING);
 			}

@@ -55,6 +55,12 @@ public class Action : MonoBehaviour {
 		anim.Punch (0);
 		CheckForHit ();
 	}
+
+	public void DoJumpKick() {
+		playerState.SetState (PLAYERSTATE.JUMPKICK);
+		anim.JumpKick ();
+		CheckForHit ();
+	}
 		
 	public void getHit(DamageObject d) {
 
