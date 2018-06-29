@@ -92,5 +92,28 @@ public class PlayerAnimator : MonoBehaviour {
 		print ("no animation found with name: " + animName);
 		return 0f;
 	}
+
+	//adds a small forward force
+	public void AddForce(float force, bool facingRight) {
+		StartCoroutine (AddForceCoroutine(force, facingRight));
+	}
+
+	//adds small force over time
+	IEnumerator AddForceCoroutine(float force, bool facingRight) {
+		CharacterController controller = transform.parent.GetComponent<CharacterController> ();
+		int dir = -1;
+		if (facingRight) {
+			dir = 1;
+		}
+		float speed = 2f;
+		float t = 0;
+
+		while (t < 1) {
+
+			controller.Move (Vector3.right * dir * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
+			t += Time.deltaTime * speed;
+			yield return null;
+		}
+	}
 }
 

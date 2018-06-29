@@ -89,17 +89,17 @@ public class Action : MonoBehaviour {
 
 		//defend
 		if(playerState.currentState == PLAYERSTATE.DEFENDING){
+			wasHit = false;
 //			if(BlockAttacksFromBehind || isFacingTarget (d.inflictor)) wasHit = false;
 //			if(!wasHit){
 ////				GlobalAudioPlayer.PlaySFX ("Defend");
 ////				anim.ShowDefendEffect();
-////				anim.CamShakeSmall();
 //
-//				if(isFacingTarget(d.inflictor)){ 
-//					anim.AddForce(-1.5f);
-//				} else {
-//					anim.AddForce(1.5f);
-//				}
+				if(isFacingTarget(d.inflictor)){ 
+					anim.AddForce(-0.05f, facingRight);
+				} else {
+					anim.AddForce(0.05f, facingRight);
+				}
 //			}
 		}
 
@@ -278,7 +278,7 @@ public class Action : MonoBehaviour {
 		anim.KnockDown ();
 		float t = 0;
 		float travelSpeed = 2f;
-		Rigidbody2D rb = GetComponent<Rigidbody2D> ();
+		Rigidbody rb = GetComponent<Rigidbody> ();
 
 		//get the direction of the attack
 		int dir = inflictor.transform.position.x > transform.position.x ? 1 : -1;
@@ -289,16 +289,6 @@ public class Action : MonoBehaviour {
 //			GetComponent<Player>().facingRight = true;
 //		}
 
-//		while (t < 1) {
-//			controller.Move (moveVector * dir * travelSpeed);
-//
-//			rb.velocity = Vector2.left * dir * travelSpeed;
-//			t += Time.deltaTime;
-//			yield return 0;
-//		}
-//
-//		//stop traveling
-//		rb.velocity = Vector2.zero;
 
 
 //		do i need this if not doing force?

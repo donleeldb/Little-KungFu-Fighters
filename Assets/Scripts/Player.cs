@@ -11,7 +11,7 @@ public class Player : MonoBehaviour {
 	private float gravity = 1.0f;
 	private float speed = 5.0f;
 
-	public float tapSpeed = 0.5f; //in seconds
+	public float tapSpeed = 0.2f; //in seconds
 
 	private float leftLastTapTime = 0;
 	private float rightLastTapTime = 0;
@@ -178,7 +178,11 @@ public class Player : MonoBehaviour {
 				}
 			}
 		}
-			
+
+		if (playerState.currentState == PLAYERSTATE.DEFENDING) {
+			return;
+		}
+
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
 		Flip (moveVector.x);
