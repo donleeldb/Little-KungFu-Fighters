@@ -21,6 +21,11 @@ public class PlayerAnimator : MonoBehaviour {
 		animator.ResetTrigger("Punch2");
 	}
 
+	public void Sprint() {
+		animator.SetTrigger ("Sprint");
+		animator.ResetTrigger("Idle");
+	}
+
 	public void Punch(int id) {
 		animator.SetBool("Walk", false);
 		animator.SetTrigger ("Punch" + id);
@@ -30,6 +35,11 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void JumpKick() {
 		animator.SetTrigger ("JumpKick");
+	}
+
+	public void SprintPunch() {
+		animator.SetTrigger ("SprintAttack");
+		StartCoroutine (WaitForAnimationFinish ("PlayerSprintAttack"));
 	}
 
 	public void StartDefend() {		
@@ -42,6 +52,7 @@ public class PlayerAnimator : MonoBehaviour {
 	}
 
 	public void Jump() {
+		animator.ResetTrigger("JumpKick");
 		animator.SetBool("Walk", false);
 		animator.SetTrigger ("Jump");
 		animator.ResetTrigger("Idle");
@@ -50,7 +61,7 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Hit() {
 		animator.SetTrigger ("Hit");
-		StartCoroutine (WaitForAnimationFinish ("PlayerHit"));
+		StartCoroutine (WaitForAnimationFinish ("Player_Hit"));
 	}
 
 	public void KnockDown() {
@@ -62,6 +73,10 @@ public class PlayerAnimator : MonoBehaviour {
 	//on animation finish
 	IEnumerator WaitForAnimationFinish(string animName) {
 		float time = GetAnimDuration(animName);
+
+		print (animName + ", time: " + time.ToString());
+
+
 		yield return new WaitForSeconds(time);
 		transform.parent.GetComponent<Action>().Ready(animName);
 	}

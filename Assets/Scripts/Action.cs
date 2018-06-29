@@ -61,6 +61,12 @@ public class Action : MonoBehaviour {
 		anim.JumpKick ();
 		CheckForHit ();
 	}
+
+	public void DoSprintPunch() {
+		playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
+		anim.SprintPunch ();
+		CheckForHit ();
+	}
 		
 	public void getHit(DamageObject d) {
 
@@ -74,6 +80,11 @@ public class Action : MonoBehaviour {
 
 		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 			wasHit = false;
+		}
+
+		if (controller.isGrounded == false) {
+			d.attackType = AttackType.KnockDown; 
+			HitKnockDownCount = 0;
 		}
 
 		//defend
@@ -144,8 +155,11 @@ public class Action : MonoBehaviour {
 	public void Ready(string animName) {
 		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 			if (animName == "PlayerKnockDown") {
-				controller.enabled = true;
+//				controller.enabled = true;
+			} else { //Hit's ready call, do nothing if knocked down.
+				return;
 			}
+
 		}
 		if (continuePunchCombo) {
 			CheckForHit ();
@@ -194,6 +208,7 @@ public class Action : MonoBehaviour {
 		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
 		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player");
 
+
 		//do a raycast to see which enemies/objects are in attack range
 		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
 		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
@@ -208,7 +223,7 @@ public class Action : MonoBehaviour {
 			if (layermask == npcLayerMask || layermask == playerLayerMask) {
 				GameObject enemy = hits [i].collider.gameObject;
 
-				if (enemy.GetComponent<CharacterController>() != controller) {
+				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
 					//				DealDamageToEnemy (hits [i].collider.gameObject);
 					enemy.GetComponent<Action>().getHit(new DamageObject(20, this.gameObject));
 					targetHit = true;
@@ -251,14 +266,15 @@ public class Action : MonoBehaviour {
 		int dir = -1;
 		if (facingRight) {
 			dir = 1;
-		}		if ((g.transform.position.x > transform.position.x && dir == 1) || (g.transform.position.x < transform.position.x && dir == -1))
+		}		
+		if ((g.transform.position.x > transform.position.x && dir == 1) || (g.transform.position.x < transform.position.x && dir == -1))
 			return true;
 		else
 			return false;
 	}
 
 	public void KnockDown(GameObject inflictor) {
-		controller.enabled = false;
+//		controller.enabled = false;
 		anim.KnockDown ();
 		float t = 0;
 		float travelSpeed = 2f;

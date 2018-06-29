@@ -11,7 +11,16 @@ public class Player : MonoBehaviour {
 	private float gravity = 1.0f;
 	private float speed = 5.0f;
 
+	public float tapSpeed = 0.5f; //in seconds
+
+	private float leftLastTapTime = 0;
+	private float rightLastTapTime = 0;
+
 	public bool facingRight;
+	private bool continuePunch = false;
+	private bool doPunch = false;
+	private bool doJumpKick = false;
+	private bool doSprintPunch = false;
 
 	private Vector3 moveVector;
 	private Vector3 lastMotion;
@@ -44,62 +53,112 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		print (playerState.currentState);
 
 		moveVector = Vector3.zero;
 
 		inputDirection_x = Input.GetAxis (horizontal) * speed;
 		inputDirection_z = Input.GetAxis (depth) * speed;
 
+		int dir = -1;
+		if (facingRight) {
+			dir = 1;
+		}	
+
 		//STOPDEFENDING is a character action
 		if (Input.GetKeyUp (DefendKey)) {
 			action.StopDefend ();
 		}
-
-		if (playerState.currentState == PLAYERSTATE.HIT ||  playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
-			return;
-		}
-
+			
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-			// When defending, you can't do anything else
-			if (playerState.currentState == PLAYERSTATE.DEFENDING) {
-				action.StartDefend ();
-				if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown(Up)) {
-					print("Tornado");
-				}
 
-			} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
-				if (Input.GetKeyDown (PunchKey)) {
-					action.ContinuePunch ();
-				}
-			} else { // right now is idle, walk
+			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 				
-				if (Input.GetKeyDown (JumpKey)) {
-					verticalVelocity = 15;
-					moveVector.x = inputDirection_x;
-					moveVector.z = inputDirection_z;
-					anim.Jump ();
-					playerState.SetState (PLAYERSTATE.JUMPING);
-				} else if (Input.GetKeyDown (PunchKey)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
-					// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
+			} else {
+				
+				// When defending, you can't do anything else
+				if (playerState.currentState == PLAYERSTATE.DEFENDING) {
+					action.StartDefend ();
+					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
+						print ("Tornado");
+					}
 
-					action.DoPunch ();
-				} else if (Input.GetKeyDown (DefendKey)) {
-					anim.StartDefend ();
-					playerState.SetState (PLAYERSTATE.DEFENDING);
-				} else if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
-					// do not set idle trigger
-				} else if (inputDirection_x == 0 && inputDirection_z == 0) {
-					if (playerState.currentState != PLAYERSTATE.PUNCH) {
+				} else if (playerState.currentState == PLAYERSTATE.SPRINTING) {
+					if ((Input.GetKeyDown (Left) && facingRight) || Input.GetKeyDown (Right) && !facingRight) {
 						anim.Idle ();
 						playerState.SetState (PLAYERSTATE.IDLE);
+					} else if (Input.GetKeyDown (PunchKey)) {
+						doSprintPunch = true;
+						playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
+					} if (Input.GetKeyDown (JumpKey)) {
+						verticalVelocity = 15;
+						moveVector.x = inputDirection_x;
+						moveVector.z = inputDirection_z;
+						anim.Jump ();
+						playerState.SetState (PLAYERSTATE.JUMPING);
+					} else {
+						inputDirection_x = dir * speed * 2;
+						moveVector.x = inputDirection_x;
+						moveVector.z = inputDirection_z;
 					}
-				} else {
-					anim.Walk ();
-					playerState.SetState (PLAYERSTATE.MOVING);
+						
+				} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
+					if (Input.GetKeyDown (PunchKey)) {
+						continuePunch = true;
+					}
+				} else if (playerState.currentState == PLAYERSTATE.SPRINTPUNCH) {
+					inputDirection_x = dir * speed;
 					moveVector.x = inputDirection_x;
-					moveVector.z = inputDirection_z;
+				} else { // right now is idle, walk
+					
+					if (Input.GetKeyDown (JumpKey)) {
+						verticalVelocity = 15;
+						moveVector.x = inputDirection_x;
+						moveVector.z = inputDirection_z;
+						anim.Jump ();
+						playerState.SetState (PLAYERSTATE.JUMPING);
+					} else if (Input.GetKeyDown (PunchKey)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
+						// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
+						doPunch = true;
+					} else if (Input.GetKeyDown (DefendKey)) {
+						anim.StartDefend ();
+						playerState.SetState (PLAYERSTATE.DEFENDING);
+					} else if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+						// do not set idle trigger
+					} else if (Input.GetKeyDown (Left)) {
+						if ((Time.time - leftLastTapTime) < tapSpeed) {
+							anim.Sprint ();
+							playerState.SetState (PLAYERSTATE.SPRINTING);
+							inputDirection_x = dir * speed * 2;
+							moveVector.x = inputDirection_x;
+							moveVector.z = inputDirection_z;
+						} else {
+							leftLastTapTime = Time.time;
+						}
+
+					} else if (Input.GetKeyDown (Right)) {
+						if ((Time.time - rightLastTapTime) < tapSpeed) {
+							anim.Sprint ();
+							playerState.SetState (PLAYERSTATE.SPRINTING);
+							inputDirection_x = dir * speed * 2;
+							moveVector.x = inputDirection_x;
+							moveVector.z = inputDirection_z;
+						} else {
+							rightLastTapTime = Time.time;
+						}
+					} else if (inputDirection_x == 0 && inputDirection_z == 0) {
+						if (playerState.currentState != PLAYERSTATE.PUNCH && playerState.currentState != PLAYERSTATE.SPRINTING) {
+							anim.Idle ();
+							playerState.SetState (PLAYERSTATE.IDLE);
+						}
+					} else {
+						anim.Walk ();
+						playerState.SetState (PLAYERSTATE.MOVING);
+						moveVector.x = inputDirection_x;
+						moveVector.z = inputDirection_z;
+					}
 				}
 			}
 
@@ -108,12 +167,15 @@ public class Player : MonoBehaviour {
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 
-			if (Input.GetKeyDown (PunchKey)) { 
-				action.DoJumpKick ();
-			}
+			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			} else {
+				if (playerState.currentState != PLAYERSTATE.JUMPKICK && Input.GetKeyDown (PunchKey)) { 
+					doJumpKick = true;
+				}
 
-			if (Input.GetKeyDown (DefendKey)) {
-				playerState.SetState (PLAYERSTATE.DEFENDING);
+				if (Input.GetKeyDown (DefendKey)) {
+					playerState.SetState (PLAYERSTATE.DEFENDING);
+				}
 			}
 		}
 			
@@ -122,6 +184,23 @@ public class Player : MonoBehaviour {
 		Flip (moveVector.x);
 		lastMotion = moveVector;
 
+	}
+
+	void FixedUpdate () {
+		if (doPunch) {
+			action.DoPunch ();
+
+		} else if (continuePunch) {
+			action.ContinuePunch ();
+		} else if (doJumpKick) {
+			action.DoJumpKick ();
+		} else if (doSprintPunch) {
+			action.DoSprintPunch ();
+		}
+		doPunch = false;
+		continuePunch = false;
+		doJumpKick = false;
+		doSprintPunch = false;
 	}
 
 	private bool IsControllerGrounded() {

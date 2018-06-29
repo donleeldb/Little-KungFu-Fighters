@@ -36,7 +36,6 @@ public class NPC : MonoBehaviour {
 	void Update () {
 
 		moveVector = Vector3.zero;
-		print (playerState.currentState);
 
 
 		if (!controller.isGrounded) { // not reliable
