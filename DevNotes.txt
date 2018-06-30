@@ -3,3 +3,4 @@
 Added a Bandit Animation Controller.
 1. Might need to change pivot of individual sprites so that it aligns better. We don't change the size or orientation of our collider so standing and lying down share the same collider. But Their sprites should be oriented accordingly.
 2. Rightnow the process of being knockdown and lying on the ground is one animation and state. They should be separated into two because while in the air, you can still be hit. But on the ground, you should be invincible.
+3. The damageObject center and range needs to be set for each attack. Right now I'm using a general method that only takes in range. it's serviceable

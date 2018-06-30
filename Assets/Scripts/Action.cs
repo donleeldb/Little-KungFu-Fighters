@@ -68,7 +68,7 @@ public class Action : MonoBehaviour {
 	public void DoSprintPunch() {
 		playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
 		anim.SprintPunch ();
-		DamageObject d = new DamageObject (20, this.gameObject, 1f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 1.5f, controller.bounds.center);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
@@ -231,8 +231,8 @@ public class Action : MonoBehaviour {
 		//do a raycast to see which enemies/objects are in attack range
 		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
 		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
-		RaycastHit[] hits = Physics.SphereCastAll (d.center, 0.5f, Vector3.right * dir, d.range, 1 << npcLayerMask | 1 << playerLayerMask);
-		Debug.DrawRay (d.center, Vector3.right * dir, Color.red, d.range);
+		RaycastHit[] hits = Physics.SphereCastAll (d.center + Vector3.right * dir * d.range * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
+		Debug.DrawRay (d.center + Vector3.right * dir * d.range * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1);
 
 		//we have hit something
 		for (int i = 0; i < hits.Length; i++) {
