@@ -53,19 +53,24 @@ public class Action : MonoBehaviour {
 	public void DoPunch() {
 		playerState.SetState (PLAYERSTATE.PUNCH);
 		anim.Punch (0);
-		CheckForHit ();
+		DamageObject d = new DamageObject (20, this.gameObject, 0.3f, controller.bounds.center);
+		CheckForHit (d);
 	}
 
 	public void DoJumpKick() {
 		playerState.SetState (PLAYERSTATE.JUMPKICK);
 		anim.JumpKick ();
-		CheckForHit ();
+		DamageObject d = new DamageObject (20, this.gameObject, 0.4f, controller.bounds.center);
+		d.attackType = AttackType.KnockDown;
+		CheckForHit (d);
 	}
 
 	public void DoSprintPunch() {
 		playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
 		anim.SprintPunch ();
-		CheckForHit ();
+		DamageObject d = new DamageObject (20, this.gameObject, 1f, controller.bounds.center);
+		d.attackType = AttackType.KnockDown;
+		CheckForHit (d);
 	}
 		
 	public void getHit(DamageObject d) {
@@ -118,9 +123,20 @@ public class Action : MonoBehaviour {
 				playerState.SetState (PLAYERSTATE.KNOCKDOWN);
 				KnockDown (d.inflictor);
 
+				if(isFacingTarget(d.inflictor)){ 
+					anim.AddForce(-0.05f, facingRight);
+				} else {
+					anim.AddForce(0.05f, facingRight);
+				}
+
 			} else {
 				playerState.SetState (PLAYERSTATE.HIT);
 				anim.Hit ();
+				if(isFacingTarget(d.inflictor)){ 
+					anim.AddForce(-0.01f, facingRight);
+				} else {
+					anim.AddForce(0.01f, facingRight);
+				}
 			}
 		}
 	}
@@ -162,7 +178,8 @@ public class Action : MonoBehaviour {
 
 		}
 		if (continuePunchCombo) {
-			CheckForHit ();
+			DamageObject d = new DamageObject (20, this.gameObject, 0.3f, controller.bounds.center);
+			CheckForHit (d);
 			doPunchAttack ();
 			continuePunchCombo = false;
 
@@ -199,7 +216,7 @@ public class Action : MonoBehaviour {
 	}
 
 	//checks if we have hit something (animation event)
-	private void CheckForHit() {
+	private void CheckForHit(DamageObject d) {
 		int dir = -1;
 		if (GetComponent<Player> ().facingRight) {
 			dir = 1;
@@ -212,8 +229,8 @@ public class Action : MonoBehaviour {
 		//do a raycast to see which enemies/objects are in attack range
 		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
 		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
-		RaycastHit[] hits = Physics.SphereCastAll (controller.bounds.center, 0.5f, Vector3.right * dir, getAttackRange(), 1 << npcLayerMask | 1 << playerLayerMask);
-		Debug.DrawRay (controller.bounds.center, Vector3.right * dir, Color.red, getAttackRange());
+		RaycastHit[] hits = Physics.SphereCastAll (d.center, 0.5f, Vector3.right * dir, d.range, 1 << npcLayerMask | 1 << playerLayerMask);
+		Debug.DrawRay (d.center, Vector3.right * dir, Color.red, d.range);
 
 		//we have hit something
 		for (int i = 0; i < hits.Length; i++) {
@@ -225,7 +242,7 @@ public class Action : MonoBehaviour {
 
 				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
 					//				DealDamageToEnemy (hits [i].collider.gameObject);
-					enemy.GetComponent<Action>().getHit(new DamageObject(20, this.gameObject));
+					enemy.GetComponent<Action>().getHit(d);
 					targetHit = true;
 				}
 

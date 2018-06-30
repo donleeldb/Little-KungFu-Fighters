@@ -6,19 +6,24 @@ public class DamageObject {
 
 	public int damage;
 	public float range;
+	public Vector3 center;
 	public AttackType attackType;
 	public GameObject inflictor;
 	public float comboResetTime = .5f;
 
-	public DamageObject(int _damage, GameObject _inflictor){
+	public DamageObject(int _damage, GameObject _inflictor, float _range, Vector3 _center){
 		damage =  _damage;
 		inflictor = _inflictor;
+		range = _range;
+		center = _center;
 	}
 
-	public DamageObject(int _damage, AttackType _attackType, GameObject _inflictor){
+	public DamageObject(int _damage, AttackType _attackType, GameObject _inflictor, float _range, Vector3 _center){
 		damage =  _damage;
 		attackType = _attackType;
 		inflictor = _inflictor;
+		range = _range;
+		center = _center;
 	}
 }
 
