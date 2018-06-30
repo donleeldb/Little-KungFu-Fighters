@@ -78,6 +78,7 @@ public class Action : MonoBehaviour {
 		bool wasHit = true;
 		UpdateHitCounter ();
 		//knockdown hit
+		print(HitKnockDownCount);
 		if (HitKnockDownCount >= HitKnockDownThreshold) { 
 			d.attackType = AttackType.KnockDown; 
 			HitKnockDownCount = 0;
@@ -87,7 +88,8 @@ public class Action : MonoBehaviour {
 			wasHit = false;
 		}
 
-		if (controller.isGrounded == false) {
+		// HOTFIX for addForce making character not grounded.
+		if (controller.isGrounded == false && playerState.currentState != PLAYERSTATE.HIT) {
 			d.attackType = AttackType.KnockDown; 
 			HitKnockDownCount = 0;
 		}

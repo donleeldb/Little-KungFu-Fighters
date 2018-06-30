@@ -73,10 +73,6 @@ public class PlayerAnimator : MonoBehaviour {
 	//on animation finish
 	IEnumerator WaitForAnimationFinish(string animName) {
 		float time = GetAnimDuration(animName);
-
-		print (animName + ", time: " + time.ToString());
-
-
 		yield return new WaitForSeconds(time);
 		transform.parent.GetComponent<Action>().Ready(animName);
 	}
