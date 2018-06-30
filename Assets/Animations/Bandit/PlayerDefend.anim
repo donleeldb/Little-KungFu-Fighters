@@ -5,7 +5,7 @@ AnimationClip:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Player_Hit
+  m_Name: PlayerDefend
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -19,7 +19,9 @@ AnimationClip:
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: 21300000, guid: bd2880ac17f56644994a92961e6c5912, type: 3}
+      value: {fileID: 21300098, guid: 6d0389d6c10854aebadff0140990aade, type: 3}
+    - time: 1
+      value: {fileID: 21300100, guid: 6d0389d6c10854aebadff0140990aade, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -39,13 +41,14 @@ AnimationClip:
       customType: 23
       isPPtrCurve: 1
     pptrCurveMapping:
-    - {fileID: 21300000, guid: bd2880ac17f56644994a92961e6c5912, type: 3}
+    - {fileID: 21300098, guid: 6d0389d6c10854aebadff0140990aade, type: 3}
+    - {fileID: 21300100, guid: 6d0389d6c10854aebadff0140990aade, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 1
+    m_StopTime: 2
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0

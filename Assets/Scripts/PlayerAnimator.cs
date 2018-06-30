@@ -61,7 +61,7 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Hit() {
 		animator.SetTrigger ("Hit");
-		StartCoroutine (WaitForAnimationFinish ("Player_Hit"));
+		StartCoroutine (WaitForAnimationFinish ("PlayerHit"));
 	}
 
 	public void KnockDown() {
