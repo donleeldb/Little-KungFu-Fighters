@@ -173,16 +173,17 @@ public class Player : MonoBehaviour {
 					doJumpKick = true;
 				}
 
-				if (Input.GetKeyDown (DefendKey)) {
-					playerState.SetState (PLAYERSTATE.DEFENDING);
-				}
+//				if (Input.GetKeyDown (DefendKey)) {
+//					playerState.SetState (PLAYERSTATE.DEFENDING);
+//				}
 			}
 		}
 
-		if (playerState.currentState == PLAYERSTATE.DEFENDING) {
-			return;
-		}
-
+		// cant remember why i put this here
+//		if (playerState.currentState == PLAYERSTATE.DEFENDING) {
+//			return;
+//		}
+//
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
 		Flip (moveVector.x);

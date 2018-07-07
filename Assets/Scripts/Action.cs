@@ -24,6 +24,11 @@ public class Action : MonoBehaviour {
 	private int HitKnockDownResetTime = 1; //the time before the hitknockdown counter resets
 	private float LastHitTime = 0; // the time when we were hit 
 
+	private int DefenseThreshold = 3; 
+	private int DefenseCount = 0; 
+	private int DefenseResetTime = 1; 
+	private float LastDefenseTime = 0;
+
 
 	// Use this for initialization
 	void Start () {
@@ -53,14 +58,14 @@ public class Action : MonoBehaviour {
 	public void DoPunch() {
 		playerState.SetState (PLAYERSTATE.PUNCH);
 		anim.Punch (0);
-		DamageObject d = new DamageObject (20, this.gameObject, 0.3f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
 		CheckForHit (d);
 	}
 
 	public void DoJumpKick() {
 		playerState.SetState (PLAYERSTATE.JUMPKICK);
 		anim.JumpKick ();
-		DamageObject d = new DamageObject (20, this.gameObject, 0.4f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
@@ -76,20 +81,13 @@ public class Action : MonoBehaviour {
 	public void getHit(DamageObject d) {
 
 		bool wasHit = true;
-		UpdateHitCounter ();
-		//knockdown hit
-		print(HitKnockDownCount);
-		if (HitKnockDownCount >= HitKnockDownThreshold) { 
-			d.attackType = AttackType.KnockDown; 
-			HitKnockDownCount = 0;
-		}
 
 		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 			wasHit = false;
 		}
 
 		// HOTFIX for addForce making character not grounded.
-		if (controller.isGrounded == false && playerState.currentState != PLAYERSTATE.HIT) {
+		if (controller.isGrounded == false && playerState.currentState != PLAYERSTATE.HIT && playerState.currentState != PLAYERSTATE.DEFENDING) {
 			d.attackType = AttackType.KnockDown; 
 			HitKnockDownCount = 0;
 		}
@@ -97,17 +95,39 @@ public class Action : MonoBehaviour {
 		//defend
 		if(playerState.currentState == PLAYERSTATE.DEFENDING){
 			wasHit = false;
+			UpdateDefenseCounter ();
+			if (DefenseCount >= DefenseThreshold) { 
+				wasHit = true;
+				anim.StopDefend();
+				DefenseCount = 0;
+			} else {
 //			if(BlockAttacksFromBehind || isFacingTarget (d.inflictor)) wasHit = false;
 //			if(!wasHit){
 ////				GlobalAudioPlayer.PlaySFX ("Defend");
 ////				anim.ShowDefendEffect();
 //
 				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-0.05f, facingRight);
+					anim.AddForce(-0.01f, facingRight);
 				} else {
-					anim.AddForce(0.05f, facingRight);
+					anim.AddForce(0.01f, facingRight);
 				}
 //			}
+			}
+
+		}
+
+		//parry
+		if (playerState.currentState == PLAYERSTATE.PUNCH) {
+			wasHit = false;
+		}
+
+		if (wasHit) {
+			UpdateHitCounter ();
+		}
+
+		if (HitKnockDownCount >= HitKnockDownThreshold) { 
+			d.attackType = AttackType.KnockDown; 
+			HitKnockDownCount = 0;
 		}
 
 //		//getting hit while being in the air also causes a knockdown
@@ -151,6 +171,16 @@ public class Action : MonoBehaviour {
 			HitKnockDownCount = 1;
 		}
 		LastHitTime = Time.time;
+	}
+
+	//updates the Defense counter
+	private void UpdateDefenseCounter() {
+		if (Time.time - LastDefenseTime < DefenseResetTime) { 
+			DefenseCount += 1;
+		} else {
+			DefenseCount = 1;
+		}
+		LastDefenseTime = Time.time;
 	}
 
 	private void Flip(float speed) {
@@ -223,47 +253,11 @@ public class Action : MonoBehaviour {
 		if (GetComponent<Player> ().facingRight) {
 			dir = 1;
 		}
-		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
-		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
-		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player");
 
+		float moveTime = 0.5f;
 
-		//do a raycast to see which enemies/objects are in attack range
-		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
-		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
-		RaycastHit[] hits = Physics.SphereCastAll (d.center + Vector3.right * dir * d.range * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
-		Debug.DrawRay (d.center + Vector3.right * dir * d.range * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1);
+		StartCoroutine (WaitBeforeRaycast (d, dir));
 
-		//we have hit something
-		for (int i = 0; i < hits.Length; i++) {
-
-			LayerMask layermask = hits [i].collider.gameObject.layer;
-			//we have hit an enemy
-			if (layermask == npcLayerMask || layermask == playerLayerMask) {
-				GameObject enemy = hits [i].collider.gameObject;
-
-				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
-					//				DealDamageToEnemy (hits [i].collider.gameObject);
-					enemy.GetComponent<Action>().getHit(d);
-					targetHit = true;
-				}
-
-			}
-
-			//			//we have hit an item
-			//			if (layermask == itemLayerMask) {
-			//				GameObject item = hits [i].collider.gameObject;
-			//				if (ObjInYRange (item)) {
-			//					item.GetComponent<ItemInteractable> ().ActivateItem (gameObject);
-			//					ShowHitEffectAtPosition (hits [i].point);
-			//				}
-			//			}
-		}
-
-		//we havent hit anything
-		if(hits.Length == 0){ 
-			targetHit = false;
-		}
 	}
 
 	//returns the attack range of the current attack
@@ -315,6 +309,52 @@ public class Action : MonoBehaviour {
 		//reset
 //		playerState.currentState = PLAYERSTATE.IDLE;
 //		anim.Idle ();
+	}
+
+	//on animation finish
+	IEnumerator WaitBeforeRaycast(DamageObject d, int dir) {
+		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
+		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player"); 
+
+		yield return new WaitForSeconds(0.1f);
+
+		//do a raycast to see which enemies/objects are in attack range
+		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
+		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
+		RaycastHit[] hits = Physics.SphereCastAll (d.center + Vector3.right * dir * d.range * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
+		Debug.DrawRay (d.center + Vector3.right * dir * d.range * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1);
+
+		//we have hit something
+		for (int i = 0; i < hits.Length; i++) {
+
+			LayerMask layermask = hits [i].collider.gameObject.layer;
+			//we have hit an enemy
+			if (layermask == npcLayerMask || layermask == playerLayerMask) {
+				GameObject enemy = hits [i].collider.gameObject;
+
+				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
+					//				DealDamageToEnemy (hits [i].collider.gameObject);
+					enemy.GetComponent<Action>().getHit(d);
+					targetHit = true;
+				}
+
+			}
+
+			//			//we have hit an item
+			//			if (layermask == itemLayerMask) {
+			//				GameObject item = hits [i].collider.gameObject;
+			//				if (ObjInYRange (item)) {
+			//					item.GetComponent<ItemInteractable> ().ActivateItem (gameObject);
+			//					ShowHitEffectAtPosition (hits [i].point);
+			//				}
+			//			}
+		}
+
+		//we havent hit anything
+		if(hits.Length == 0){ 
+			targetHit = false;
+		}
 	}
 
 }
