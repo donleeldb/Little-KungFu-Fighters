@@ -82,7 +82,11 @@ public class Player : MonoBehaviour {
 				if (playerState.currentState == PLAYERSTATE.DEFENDING) {
 					action.StartDefend ();
 					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
-						print ("Tornado");
+						verticalVelocity = 20;
+						moveVector.x = dir*2;
+						action.StopDefend ();
+						action.ShengLongBa ();
+						playerState.SetState (PLAYERSTATE.JUMPING);
 					}
 
 				} else if (playerState.currentState == PLAYERSTATE.SPRINTING) {

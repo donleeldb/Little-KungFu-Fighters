@@ -64,9 +64,16 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerHit"));
 	}
 
+	public void ShengLongBa() {
+		animator.SetTrigger ("ShengLongBa");
+		animator.ResetTrigger("Idle");
+		animator.ResetTrigger("JumpKick");
+	}
+
 	public void KnockDown() {
 		animator.SetTrigger ("KnockDown");
 		animator.ResetTrigger("Idle");
+		animator.SetBool ("Defend", false);
 		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
 	}
 
@@ -91,11 +98,15 @@ public class PlayerAnimator : MonoBehaviour {
 
 	//adds a small forward force
 	public void AddForce(float force, bool facingRight) {
-		StartCoroutine (AddForceCoroutine(force, facingRight));
+		StartCoroutine (AddForceCoroutine(force, facingRight, false));
 	}
 
+
+	public void AddVerticalForce(float force, bool facingRight) {
+		StartCoroutine (AddForceCoroutine(force, facingRight, true));
+	}
 	//adds small force over time
-	IEnumerator AddForceCoroutine(float force, bool facingRight) {
+	IEnumerator AddForceCoroutine(float force, bool facingRight, bool vertical) {
 		CharacterController controller = transform.parent.GetComponent<CharacterController> ();
 		int dir = -1;
 		if (facingRight) {
@@ -104,9 +115,15 @@ public class PlayerAnimator : MonoBehaviour {
 		float speed = 2f;
 		float t = 0;
 
+		Vector3 direction = Vector3.right * dir;
+
+		if (vertical) {
+			direction = Vector3.up;
+		}
+
 		while (t < 1) {
 
-			controller.Move (Vector3.right * dir * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
+			controller.Move (direction * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
 			t += Time.deltaTime * speed;
 			yield return null;
 		}

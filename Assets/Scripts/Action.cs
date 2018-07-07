@@ -77,8 +77,15 @@ public class Action : MonoBehaviour {
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
+
+	public void ShengLongBa() {
+		anim.ShengLongBa ();
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
+		d.attackType = AttackType.KnockDown;
+		CheckForHit (d, true);
+	}
 		
-	public void getHit(DamageObject d) {
+	public void getHit(DamageObject d, bool vertical) {
 
 		bool wasHit = true;
 
@@ -136,6 +143,11 @@ public class Action : MonoBehaviour {
 //			HitKnockDownCount = 0;
 //		}
 
+		// temporary for shenglongba
+		if (vertical) {
+			wasHit = true;
+		}
+
 		//start knockDown sequence
 		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
@@ -149,6 +161,11 @@ public class Action : MonoBehaviour {
 					anim.AddForce(-0.05f, facingRight);
 				} else {
 					anim.AddForce(0.05f, facingRight);
+				}
+
+				if (vertical) {
+					anim.AddVerticalForce (1f, facingRight);
+
 				}
 
 			} else {
@@ -248,7 +265,7 @@ public class Action : MonoBehaviour {
 	}
 
 	//checks if we have hit something (animation event)
-	private void CheckForHit(DamageObject d) {
+	private void CheckForHit(DamageObject d, bool vertical=false) {
 		int dir = -1;
 		if (GetComponent<Player> ().facingRight) {
 			dir = 1;
@@ -256,7 +273,7 @@ public class Action : MonoBehaviour {
 
 		float moveTime = 0.5f;
 
-		StartCoroutine (WaitBeforeRaycast (d, dir));
+		StartCoroutine (WaitBeforeRaycast (d, dir, vertical));
 
 	}
 
@@ -312,7 +329,7 @@ public class Action : MonoBehaviour {
 	}
 
 	//on animation finish
-	IEnumerator WaitBeforeRaycast(DamageObject d, int dir) {
+	IEnumerator WaitBeforeRaycast(DamageObject d, int dir, bool vertical) {
 		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
 		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
 		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player"); 
@@ -335,7 +352,7 @@ public class Action : MonoBehaviour {
 
 				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
 					//				DealDamageToEnemy (hits [i].collider.gameObject);
-					enemy.GetComponent<Action>().getHit(d);
+					enemy.GetComponent<Action>().getHit(d, vertical);
 					targetHit = true;
 				}
 
