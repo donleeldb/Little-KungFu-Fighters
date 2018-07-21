@@ -71,7 +71,7 @@ public class Player : MonoBehaviour {
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-			if (playerState.currentState == PLAYERSTATE.HIT) {
+			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
 				print (action.verticalVelocity);
