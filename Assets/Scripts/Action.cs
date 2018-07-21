@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Action : MonoBehaviour {
 
-	private bool facingRight;
+	public bool facingRight;
 
 	private Vector3 moveVector;
 	private Vector3 lastMotion;
@@ -29,6 +29,7 @@ public class Action : MonoBehaviour {
 	private int DefenseResetTime = 1; 
 	private float LastDefenseTime = 0;
 
+	public float verticalVelocity;
 
 	// Use this for initialization
 	void Start () {
@@ -36,6 +37,12 @@ public class Action : MonoBehaviour {
 		anim = GetComponentInChildren<PlayerAnimator> ();
 		playerState = GetComponent<PlayerState> ();
 		facingRight = true;
+	}
+
+	public void move(Vector3 moveVector) {
+		moveVector.y = verticalVelocity;
+		controller.Move (moveVector * Time.deltaTime);
+		Flip (moveVector.x);
 	}
 
 	public void StopDefend() {
@@ -58,14 +65,14 @@ public class Action : MonoBehaviour {
 	public void DoPunch() {
 		playerState.SetState (PLAYERSTATE.PUNCH);
 		anim.Punch (0);
-		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, Vector3.zero, 0.005f);
 		CheckForHit (d);
 	}
 
 	public void DoJumpKick() {
 		playerState.SetState (PLAYERSTATE.JUMPKICK);
 		anim.JumpKick ();
-		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, Vector3.zero, 0.01f);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
@@ -73,19 +80,23 @@ public class Action : MonoBehaviour {
 	public void DoSprintPunch() {
 		playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
 		anim.SprintPunch ();
-		DamageObject d = new DamageObject (20, this.gameObject, 1.5f, controller.bounds.center);
+		DamageObject d = new DamageObject (20, this.gameObject, 1.5f, Vector3.zero, 0.01f);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
 
 	public void ShengLongBa() {
 		anim.ShengLongBa ();
-		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, controller.bounds.center);
-		d.attackType = AttackType.KnockDown;
-		CheckForHit (d, true);
+		DamageObject d1 = new DamageObject (20, this.gameObject, 0.5f, Vector3.down, 0.01f, 3f);
+		d1.attackType = AttackType.KnockDown;
+		d1.lag = 0f;
+		CheckForHit (d1);
+		DamageObject d2 = new DamageObject (20, this.gameObject, 0.5f, Vector3.down, 0.01f, 0.5f);
+		d2.lag = 0.1f;
+		CheckForHit (d2);
 	}
 		
-	public void getHit(DamageObject d, bool vertical) {
+	public void getHit(DamageObject d) {
 
 		bool wasHit = true;
 
@@ -114,16 +125,16 @@ public class Action : MonoBehaviour {
 ////				anim.ShowDefendEffect();
 //
 				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-0.01f, facingRight);
+					anim.AddForce(-0.005f, facingRight);
 				} else {
-					anim.AddForce(0.01f, facingRight);
+					anim.AddForce(0.005f, facingRight);
 				}
 //			}
 			}
 
 		}
 
-		//parry
+		//parry //need to add math for different types of attack
 		if (playerState.currentState == PLAYERSTATE.PUNCH) {
 			wasHit = false;
 		}
@@ -136,17 +147,7 @@ public class Action : MonoBehaviour {
 			d.attackType = AttackType.KnockDown; 
 			HitKnockDownCount = 0;
 		}
-
-//		//getting hit while being in the air also causes a knockdown
-//		if(!GetComponent<PlayerMovement>().playerIsGrounded()){
-//			d.attackType = AttackType.KnockDown; 
-//			HitKnockDownCount = 0;
-//		}
-
-		// temporary for shenglongba
-		if (vertical) {
-			wasHit = true;
-		}
+			
 
 		//start knockDown sequence
 		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
@@ -163,18 +164,18 @@ public class Action : MonoBehaviour {
 					anim.AddForce(0.05f, facingRight);
 				}
 
-				if (vertical) {
-					anim.AddVerticalForce (1f, facingRight);
-
+				if (d.verticalForce != 0f) {
+//					anim.AddVerticalForce (d.verticalForce, facingRight);
+					verticalVelocity = 15f;
 				}
 
 			} else {
 				playerState.SetState (PLAYERSTATE.HIT);
 				anim.Hit ();
 				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-0.01f, facingRight);
+					anim.AddForce(-d.force, facingRight);
 				} else {
-					anim.AddForce(0.01f, facingRight);
+					anim.AddForce(d.force, facingRight);
 				}
 			}
 		}
@@ -227,7 +228,7 @@ public class Action : MonoBehaviour {
 
 		}
 		if (continuePunchCombo) {
-			DamageObject d = new DamageObject (20, this.gameObject, 0.3f, controller.bounds.center);
+			DamageObject d = new DamageObject (20, this.gameObject, 0.3f, Vector3.zero, 0.005f);
 			CheckForHit (d);
 			doPunchAttack ();
 			continuePunchCombo = false;
@@ -265,30 +266,16 @@ public class Action : MonoBehaviour {
 	}
 
 	//checks if we have hit something (animation event)
-	private void CheckForHit(DamageObject d, bool vertical=false) {
+	private void CheckForHit(DamageObject d) {
 		int dir = -1;
-		if (GetComponent<Player> ().facingRight) {
+		if (facingRight) {
 			dir = 1;
 		}
 
 		float moveTime = 0.5f;
 
-		StartCoroutine (WaitBeforeRaycast (d, dir, vertical));
+		StartCoroutine (WaitBeforeRaycast (d, dir));
 
-	}
-
-	//returns the attack range of the current attack
-	private float getAttackRange() {
-		//		if (playerState.currentState == PLAYERSTATE.PUNCH && attackNum <= PunchAttackData.Length) {
-		//			return PunchAttackData [attackNum].range;
-		//		} else if (playerState.currentState == PLAYERSTATE.KICK && attackNum <= KickAttackData.Length) {
-		//			return KickAttackData [attackNum].range;
-		//		} else if(jumpKickActive){
-		//			return JumpKickData.range;
-		//		} else {
-		//			return 0f;
-		//		}
-		return 0.5f;
 	}
 
 	//returns true is the player is facing the enemy
@@ -319,28 +306,24 @@ public class Action : MonoBehaviour {
 //			GetComponent<Player>().facingRight = true;
 //		}
 
-
-
-//		do i need this if not doing force?
-//		yield return new WaitForSeconds (1);
-		//reset
-//		playerState.currentState = PLAYERSTATE.IDLE;
-//		anim.Idle ();
 	}
 
 	//on animation finish
-	IEnumerator WaitBeforeRaycast(DamageObject d, int dir, bool vertical) {
-		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+	IEnumerator WaitBeforeRaycast(DamageObject d, int dir) {
+		
 		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
 		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player"); 
 
-		yield return new WaitForSeconds(0.1f);
+		yield return new WaitForSeconds(d.lag);
 
-		//do a raycast to see which enemies/objects are in attack range
-		//		RaycastHit2D[] hits = Physics2D.RaycastAll (playerPos, Vector3.right * dir, getAttackRange(), 1 << fighterLayerMask | 1 << itemLayerMask);
-		//		Gizmos.DrawSphere (playerPos + new Vector3 (0f,getAttackRange(),0f), 0.5f);
-		RaycastHit[] hits = Physics.SphereCastAll (d.center + Vector3.right * dir * d.range * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
-		Debug.DrawRay (d.center + Vector3.right * dir * d.range * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1);
+//		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+
+		Vector3 rayLength = Vector3.right * dir * d.range; // dictates the attack range
+		Vector3 center = controller.bounds.center + d.centerOffset;
+
+
+		RaycastHit[] hits = Physics.SphereCastAll (center + rayLength * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
+		Debug.DrawRay (center + rayLength * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1); // first param is the source, second is length
 
 		//we have hit something
 		for (int i = 0; i < hits.Length; i++) {
@@ -351,21 +334,12 @@ public class Action : MonoBehaviour {
 				GameObject enemy = hits [i].collider.gameObject;
 
 				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
-					//				DealDamageToEnemy (hits [i].collider.gameObject);
-					enemy.GetComponent<Action>().getHit(d, vertical);
+
+					enemy.GetComponent<Action>().getHit(d);
 					targetHit = true;
 				}
 
 			}
-
-			//			//we have hit an item
-			//			if (layermask == itemLayerMask) {
-			//				GameObject item = hits [i].collider.gameObject;
-			//				if (ObjInYRange (item)) {
-			//					item.GetComponent<ItemInteractable> ().ActivateItem (gameObject);
-			//					ShowHitEffectAtPosition (hits [i].point);
-			//				}
-			//			}
 		}
 
 		//we havent hit anything
@@ -373,5 +347,7 @@ public class Action : MonoBehaviour {
 			targetHit = false;
 		}
 	}
+
+
 
 }

@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class NPC : MonoBehaviour {
 
-	private float verticalVelocity;
-	private float gravity = 1.0f;
+	private float gravity = 0.50f;
 	private float speed = 5.0f;
 
-	private bool facingRight;
 
 	private PlayerState playerState;
+	private Action action;
 
 	private Vector3 moveVector;
 	private Vector3 lastMotion;
@@ -28,8 +27,8 @@ public class NPC : MonoBehaviour {
 	void Start () {
 		controller = GetComponent<CharacterController> ();
 		anim = GetComponentInChildren<PlayerAnimator> ();
+		action = GetComponentInChildren<Action> ();
 		playerState = GetComponent<PlayerState> ();
-		facingRight = true;
 	}
 
 	// Update is called once per frame
@@ -40,12 +39,13 @@ public class NPC : MonoBehaviour {
 
 		if (!controller.isGrounded) { // not reliable
 			//		if (!IsControllerGrounded()) { // mine is bugged
-			verticalVelocity -= gravity;
+			action.verticalVelocity -= gravity;
+			moveVector.x = lastMotion.x;
+			moveVector.z = lastMotion.z;
 		}
 
-		moveVector.y = verticalVelocity;
-		controller.Move (moveVector * Time.deltaTime);
-		Flip (moveVector.x);
+		moveVector.y = action.verticalVelocity;
+		action.move (moveVector * Time.deltaTime);
 		lastMotion = moveVector;
 
 	}
@@ -72,16 +72,6 @@ public class NPC : MonoBehaviour {
 			return true;
 		}
 		return false;
-	}
-
-	private void Flip(float speed) {
-		if (speed > 0 && !facingRight || speed < 0 && facingRight) {
-			facingRight = !facingRight;
-			Vector3 temp = transform.localScale;
-			temp.x *= -1;
-			transform.localScale = temp;
-		}
-
 	}
 
 }

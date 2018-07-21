@@ -6,24 +6,31 @@ public class DamageObject {
 
 	public int damage;
 	public float range;
-	public Vector3 center;
+	public Vector3 centerOffset;
 	public AttackType attackType;
 	public GameObject inflictor;
 	public float comboResetTime = .5f;
+	public float force = 0.01f;
+	public float verticalForce = 0f;
+	public float lag = 0.1f; // time before shooting raycast
 
-	public DamageObject(int _damage, GameObject _inflictor, float _range, Vector3 _center){
+	public DamageObject(int _damage, GameObject _inflictor, float _range, Vector3 _centerOffset, float _force, float _verticalForce=0f){
 		damage =  _damage;
 		inflictor = _inflictor;
 		range = _range;
-		center = _center;
+		centerOffset = _centerOffset;
+		force = _force;
+		verticalForce = _verticalForce;
 	}
 
-	public DamageObject(int _damage, AttackType _attackType, GameObject _inflictor, float _range, Vector3 _center){
+	public DamageObject(int _damage, AttackType _attackType, GameObject _inflictor, float _range, Vector3 _centerOffset, float _force, float _verticalForce=0f){
 		damage =  _damage;
 		attackType = _attackType;
 		inflictor = _inflictor;
 		range = _range;
-		center = _center;
+		centerOffset = _centerOffset;
+		force = _force;
+		verticalForce = _verticalForce;
 	}
 }
 

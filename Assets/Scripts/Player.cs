@@ -7,8 +7,7 @@ public class Player : MonoBehaviour {
 	private float inputDirection_x;
 	private float inputDirection_z;
 
-	private float verticalVelocity;
-	private float gravity = 1.0f;
+	private float gravity = 0.50f;
 	private float speed = 5.0f;
 
 	public float tapSpeed = 0.2f; //in seconds
@@ -48,7 +47,6 @@ public class Player : MonoBehaviour {
 		anim = GetComponentInChildren<PlayerAnimator> ();
 		action = GetComponent<Action> ();
 		playerState = GetComponent<PlayerState> ();
-		facingRight = true;
 	}
 	
 	// Update is called once per frame
@@ -61,7 +59,7 @@ public class Player : MonoBehaviour {
 		inputDirection_z = Input.GetAxis (depth) * speed;
 
 		int dir = -1;
-		if (facingRight) {
+		if (action.facingRight) {
 			dir = 1;
 		}	
 
@@ -73,7 +71,6 @@ public class Player : MonoBehaviour {
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-
 			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
 				
 			} else {
@@ -82,7 +79,7 @@ public class Player : MonoBehaviour {
 				if (playerState.currentState == PLAYERSTATE.DEFENDING) {
 					action.StartDefend ();
 					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
-						verticalVelocity = 20;
+						action.verticalVelocity = 15;
 						moveVector.x = dir*2;
 						action.StopDefend ();
 						action.ShengLongBa ();
@@ -90,14 +87,14 @@ public class Player : MonoBehaviour {
 					}
 
 				} else if (playerState.currentState == PLAYERSTATE.SPRINTING) {
-					if ((Input.GetKeyDown (Left) && facingRight) || Input.GetKeyDown (Right) && !facingRight) {
+					if ((Input.GetKeyDown (Left) && action.facingRight) || Input.GetKeyDown (Right) && !action.facingRight) {
 						anim.Idle ();
 						playerState.SetState (PLAYERSTATE.IDLE);
 					} else if (Input.GetKeyDown (PunchKey)) {
 						doSprintPunch = true;
 						playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
 					} if (Input.GetKeyDown (JumpKey)) {
-						verticalVelocity = 15;
+						action.verticalVelocity = 15;
 						moveVector.x = inputDirection_x;
 						moveVector.z = inputDirection_z;
 						anim.Jump ();
@@ -118,7 +115,7 @@ public class Player : MonoBehaviour {
 				} else { // right now is idle, walk
 					
 					if (Input.GetKeyDown (JumpKey)) {
-						verticalVelocity = 15;
+						action.verticalVelocity = 15;
 						moveVector.x = inputDirection_x;
 						moveVector.z = inputDirection_z;
 						anim.Jump ();
@@ -167,7 +164,7 @@ public class Player : MonoBehaviour {
 			}
 
 		} else {
-			verticalVelocity -= gravity;
+			action.verticalVelocity -= gravity;
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 
@@ -188,9 +185,9 @@ public class Player : MonoBehaviour {
 //			return;
 //		}
 //
-		moveVector.y = verticalVelocity;
-		controller.Move (moveVector * Time.deltaTime);
-		Flip (moveVector.x);
+
+		moveVector.y = action.verticalVelocity;
+		action.move (moveVector);
 		lastMotion = moveVector;
 
 	}
@@ -236,15 +233,7 @@ public class Player : MonoBehaviour {
 		return false;
 	}
 
-	private void Flip(float speed) {
-		if (speed > 0 && !facingRight || speed < 0 && facingRight) {
-			facingRight = !facingRight;
-			Vector3 temp = transform.localScale;
-			temp.x *= -1;
-			transform.localScale = temp;
-		}
-	
-	}
+
 
 	void OnControllerColliderHit(ControllerColliderHit hit)
 	{
