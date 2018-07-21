@@ -124,6 +124,7 @@ public class Action : MonoBehaviour {
 ////				GlobalAudioPlayer.PlaySFX ("Defend");
 ////				anim.ShowDefendEffect();
 //
+				anim.ShowDefendEffect();
 				if(isFacingTarget(d.inflictor)){ 
 					anim.AddForce(-0.005f, facingRight);
 				} else {
@@ -152,7 +153,7 @@ public class Action : MonoBehaviour {
 		//start knockDown sequence
 		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKBACK && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
-//			anim.ShowHitEffect ();
+			anim.ShowHitEffect ();
 
 			if (d.attackType == AttackType.KnockDown) {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);

@@ -82,6 +82,24 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
 	}
 
+	//show hit effect
+	public void ShowHitEffect() {
+		GameObject.Instantiate (Resources.Load ("HitEffect"), transform.position, Quaternion.identity);
+	}
+
+	//show defend effect
+	public void ShowDefendEffect() {
+//		Vector3 offset = Vector3.up * 1.7f + Vector3.right * (int)transform.parent.GetComponent<PlayerMovement> ().getCurrentDirection () * .2f;
+		Vector3 offset = Vector3.zero;
+		GameObject.Instantiate (Resources.Load ("DefendEffect"), transform.position + offset, Quaternion.identity);
+	}
+
+	//Show dust effect
+	public void ShowDustEffect() {
+		GameObject.Instantiate (Resources.Load ("SmokePuffEffect"), transform.position, Quaternion.identity);
+	}
+
+
 	//on animation finish
 	IEnumerator WaitForAnimationFinish(string animName) {
 		float time = GetAnimDuration(animName);
