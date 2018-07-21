@@ -150,17 +150,19 @@ public class Action : MonoBehaviour {
 			
 
 		//start knockDown sequence
-		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
+		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKBACK && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
 //			anim.ShowHitEffect ();
 
 			if (d.attackType == AttackType.KnockDown) {
-				playerState.SetState (PLAYERSTATE.KNOCKDOWN);
-				KnockDown (d.inflictor);
+				playerState.SetState (PLAYERSTATE.KNOCKBACK);
+				KnockBack (d.inflictor);
 
 				if(isFacingTarget(d.inflictor)){ 
+					verticalVelocity = 5f;
 					anim.AddForce(-0.05f, facingRight);
 				} else {
+					verticalVelocity = 5f;
 					anim.AddForce(0.05f, facingRight);
 				}
 
@@ -219,7 +221,7 @@ public class Action : MonoBehaviour {
 	}
 
 	public void Ready(string animName) {
-		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			if (animName == "PlayerKnockDown") {
 //				controller.enabled = true;
 			} else { //Hit's ready call, do nothing if knocked down.
@@ -227,6 +229,7 @@ public class Action : MonoBehaviour {
 			}
 
 		}
+
 		if (continuePunchCombo) {
 			DamageObject d = new DamageObject (20, this.gameObject, 0.3f, Vector3.zero, 0.005f);
 			CheckForHit (d);
@@ -290,9 +293,9 @@ public class Action : MonoBehaviour {
 			return false;
 	}
 
-	public void KnockDown(GameObject inflictor) {
+	public void KnockBack(GameObject inflictor) {
 //		controller.enabled = false;
-		anim.KnockDown ();
+		anim.KnockBack ();
 		float t = 0;
 		float travelSpeed = 2f;
 		Rigidbody rb = GetComponent<Rigidbody> ();
@@ -333,7 +336,7 @@ public class Action : MonoBehaviour {
 			if (layermask == npcLayerMask || layermask == playerLayerMask) {
 				GameObject enemy = hits [i].collider.gameObject;
 
-				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKDOWN && enemy.GetComponent<CharacterController>().isGrounded)) {
+				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKBACK && enemy.GetComponent<CharacterController>().isGrounded)) {
 
 					enemy.GetComponent<Action>().getHit(d);
 					targetHit = true;

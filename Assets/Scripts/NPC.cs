@@ -42,6 +42,13 @@ public class NPC : MonoBehaviour {
 			action.verticalVelocity -= gravity;
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
+		} else {
+			if (playerState.currentState == PLAYERSTATE.KNOCKBACK) {
+				if (action.verticalVelocity < 1f) {
+					playerState.currentState = PLAYERSTATE.KNOCKDOWN;
+					anim.KnockDown ();
+				}
+			}
 		}
 
 		moveVector.y = action.verticalVelocity;

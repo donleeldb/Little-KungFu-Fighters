@@ -71,8 +71,15 @@ public class Player : MonoBehaviour {
 		if (controller.isGrounded) { // not reliable
 //		if (IsControllerGrounded()) { // mine is bugged
 
-			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			if (playerState.currentState == PLAYERSTATE.HIT) {
 				
+			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
+				print (action.verticalVelocity);
+				if (action.verticalVelocity < 1f) {
+					playerState.currentState = PLAYERSTATE.KNOCKDOWN;
+					anim.KnockDown ();
+				}
+
 			} else {
 				
 				// When defending, you can't do anything else
@@ -126,7 +133,7 @@ public class Player : MonoBehaviour {
 					} else if (Input.GetKeyDown (DefendKey)) {
 						anim.StartDefend ();
 						playerState.SetState (PLAYERSTATE.DEFENDING);
-					} else if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+					} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 						// do not set idle trigger
 					} else if (Input.GetKeyDown (Left)) {
 						if ((Time.time - leftLastTapTime) < tapSpeed) {
@@ -168,7 +175,7 @@ public class Player : MonoBehaviour {
 			moveVector.x = lastMotion.x;
 			moveVector.z = lastMotion.z;
 
-			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			} else {
 				if (playerState.currentState != PLAYERSTATE.JUMPKICK && Input.GetKeyDown (PunchKey)) { 
 					doJumpKick = true;

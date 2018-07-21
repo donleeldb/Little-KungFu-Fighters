@@ -70,10 +70,15 @@ public class PlayerAnimator : MonoBehaviour {
 		animator.ResetTrigger("JumpKick");
 	}
 
+	public void KnockBack() {
+		animator.SetTrigger ("KnockBack");
+		animator.ResetTrigger("Idle");
+		animator.ResetTrigger("KnockDown");
+		animator.SetBool ("Defend", false);
+	}
+
 	public void KnockDown() {
 		animator.SetTrigger ("KnockDown");
-		animator.ResetTrigger("Idle");
-		animator.SetBool ("Defend", false);
 		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
 	}
 
