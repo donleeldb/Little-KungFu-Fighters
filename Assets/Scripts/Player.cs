@@ -28,6 +28,9 @@ public class Player : MonoBehaviour {
 	private PlayerState playerState;
 	private PlayerAnimator anim;
 	private Action action;
+	private Health health;
+	private Stamina stamina;
+	public GameObject staminaBar;
 
 	public KeyCode Left;
 	public KeyCode Right;
@@ -47,11 +50,16 @@ public class Player : MonoBehaviour {
 		anim = GetComponentInChildren<PlayerAnimator> ();
 		action = GetComponent<Action> ();
 		playerState = GetComponent<PlayerState> ();
+		health = GetComponent<Health> ();
+		stamina = GetComponent<Stamina> ();
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		print (playerState.currentState);
+
+		stamina.AddStamina (0.1f);
 
 		moveVector = Vector3.zero;
 
@@ -86,11 +94,14 @@ public class Player : MonoBehaviour {
 				if (playerState.currentState == PLAYERSTATE.DEFENDING) {
 					action.StartDefend ();
 					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
-						action.verticalVelocity = 15;
-						moveVector.x = dir*2;
-						action.StopDefend ();
-						action.ShengLongBa ();
-						playerState.SetState (PLAYERSTATE.JUMPING);
+						if (checkStamina (50)) {
+							action.verticalVelocity = 15;
+							moveVector.x = dir*2;
+							action.StopDefend ();
+							action.ShengLongBa ();
+							playerState.SetState (PLAYERSTATE.JUMPING);
+						}
+
 					}
 
 				} else if (playerState.currentState == PLAYERSTATE.SPRINTING) {
@@ -98,8 +109,10 @@ public class Player : MonoBehaviour {
 						anim.Idle ();
 						playerState.SetState (PLAYERSTATE.IDLE);
 					} else if (Input.GetKeyDown (PunchKey)) {
-						doSprintPunch = true;
-						playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
+						if (checkStamina (20)) {
+							doSprintPunch = true;
+							playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
+						}
 					} if (Input.GetKeyDown (JumpKey)) {
 						action.verticalVelocity = 15;
 						moveVector.x = inputDirection_x;
@@ -197,16 +210,31 @@ public class Player : MonoBehaviour {
 		action.move (moveVector);
 		lastMotion = moveVector;
 
+		staminaBar.GetComponentsInChildren<StaminaBar> ()[0].UpdateBar (stamina.CurrentStamina, stamina.MaxStamina);
+
+	}
+
+	bool checkStamina (int staminaRequired) {
+		if (stamina.CurrentStamina > staminaRequired) {
+			stamina.SubstractStamina (staminaRequired);
+			return true;
+		}
+		return false;
 	}
 
 	void FixedUpdate () {
 		if (doPunch) {
-			action.DoPunch ();
-
+			if (checkStamina (10)) {
+				action.DoPunch ();
+			}
 		} else if (continuePunch) {
-			action.ContinuePunch ();
+			if (checkStamina (10)) {
+				action.ContinuePunch ();
+			}
 		} else if (doJumpKick) {
-			action.DoJumpKick ();
+			if (checkStamina (10)) {
+				action.DoJumpKick ();
+			}
 		} else if (doSprintPunch) {
 			action.DoSprintPunch ();
 		}

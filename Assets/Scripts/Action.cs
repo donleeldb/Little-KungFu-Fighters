@@ -12,7 +12,8 @@ public class Action : MonoBehaviour {
 
 	private PlayerState playerState;
 	private PlayerAnimator anim;
-
+	private Health health;
+	private Stamina stamina;
 
 	private int attackNum = 0; //the current attack number
 	private bool continuePunchCombo; //true if a punch combo needs to continue
@@ -29,6 +30,7 @@ public class Action : MonoBehaviour {
 	private int DefenseResetTime = 1; 
 	private float LastDefenseTime = 0;
 
+
 	public float verticalVelocity;
 
 	// Use this for initialization
@@ -36,6 +38,8 @@ public class Action : MonoBehaviour {
 		controller = GetComponent<CharacterController> ();
 		anim = GetComponentInChildren<PlayerAnimator> ();
 		playerState = GetComponent<PlayerState> ();
+		health = GetComponent<Health> ();
+		stamina = GetComponent<Stamina> ();
 		facingRight = true;
 	}
 

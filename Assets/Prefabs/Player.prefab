@@ -55,9 +55,11 @@ GameObject:
   m_Component:
   - component: {fileID: 4660784660919902}
   - component: {fileID: 143714395885772190}
+  - component: {fileID: 114994877258441862}
   - component: {fileID: 114670547074572622}
   - component: {fileID: 114229123164386284}
   - component: {fileID: 114339665347874800}
+  - component: {fileID: 114630954235273752}
   - component: {fileID: 54168740462505962}
   m_Layer: 8
   m_Name: Player
@@ -161,6 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e066638ba0cd40e69a824e9d7312e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  facingRight: 0
+  verticalVelocity: 0
 --- !u!114 &114339665347874800
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -184,6 +188,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bd35ea5a4a154b0bb3c70a36b097cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114630954235273752
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1659340576657906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ace4e265a064f46a943c2e8db9f589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxStamina: 100
+  CurrentStamina: 100
+  invulnerable: 0
 --- !u!114 &114670547074572622
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -206,6 +224,20 @@ MonoBehaviour:
   DefendKey: 121
   horizontal: Horizontal
   depth: Depth
+--- !u!114 &114994877258441862
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1659340576657906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89242fcae38f349fd81fefaa94381815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxHp: 100
+  CurrentHp: 100
+  invulnerable: 0
 --- !u!143 &143714395885772190
 CharacterController:
   m_ObjectHideFlags: 1
