@@ -21,7 +21,6 @@ public class Player : MonoBehaviour {
 	private bool doJumpKick = false;
 	private bool doSprintPunch = false;
 
-	private Vector3 moveVector;
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
@@ -61,7 +60,7 @@ public class Player : MonoBehaviour {
 
 		stamina.AddStamina (0.1f);
 
-		moveVector = Vector3.zero;
+		action.moveVector = Vector3.zero;
 
 		inputDirection_x = Input.GetAxis (horizontal) * speed;
 		inputDirection_z = Input.GetAxis (depth) * speed;
@@ -72,7 +71,8 @@ public class Player : MonoBehaviour {
 		}	
 
 		//STOPDEFENDING is a character action
-		if (Input.GetKeyUp (DefendKey)) {
+		// second condition because if not might break the current combo system by stopdefending twice
+		if (Input.GetKeyUp (DefendKey) && playerState.currentState == PLAYERSTATE.DEFENDING) {
 			action.StopDefend ();
 		}
 			
@@ -93,14 +93,30 @@ public class Player : MonoBehaviour {
 				// When defending, you can't do anything else
 				if (playerState.currentState == PLAYERSTATE.DEFENDING) {
 					action.StartDefend ();
-					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
-						if (checkStamina (50)) {
-							action.verticalVelocity = 15;
-							moveVector.x = dir*2;
-							action.StopDefend ();
-							action.ShengLongBa ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
+					if (Input.GetKey (PunchKey)) {
+						if (Input.GetKeyDown(Up)) {
+							if (checkStamina (10)) {
+								action.verticalVelocity = 10;
+								action.moveVector.x = dir*2;
+								action.StopDefend ();
+								action.ShengLongBa ();
+								playerState.SetState (PLAYERSTATE.JUMPING);
+							}
 						}
+					} else if (Input.GetKey (Up)) {
+						if (Input.GetKeyDown(PunchKey)) {
+							if (checkStamina (10)) {
+								action.verticalVelocity = 10;
+								action.moveVector.x = dir*2;
+								action.StopDefend ();
+								action.ShengLongBa ();
+								playerState.SetState (PLAYERSTATE.JUMPING);
+							}
+						}
+					}
+						
+					if (Input.GetKeyDown (PunchKey) && Input.GetKeyDown (Up)) {
+						
 
 					}
 
@@ -114,15 +130,15 @@ public class Player : MonoBehaviour {
 							playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
 						}
 					} if (Input.GetKeyDown (JumpKey)) {
-						action.verticalVelocity = 15;
-						moveVector.x = inputDirection_x;
-						moveVector.z = inputDirection_z;
+						action.verticalVelocity = 10;
+						action.moveVector.x = inputDirection_x;
+						action.moveVector.z = inputDirection_z;
 						anim.Jump ();
 						playerState.SetState (PLAYERSTATE.JUMPING);
 					} else {
 						inputDirection_x = dir * speed * 2;
-						moveVector.x = inputDirection_x;
-						moveVector.z = inputDirection_z;
+						action.moveVector.x = inputDirection_x;
+						action.moveVector.z = inputDirection_z;
 					}
 						
 				} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
@@ -131,13 +147,13 @@ public class Player : MonoBehaviour {
 					}
 				} else if (playerState.currentState == PLAYERSTATE.SPRINTPUNCH) {
 					inputDirection_x = dir * speed;
-					moveVector.x = inputDirection_x;
+					action.moveVector.x = inputDirection_x;
 				} else { // right now is idle, walk
 					
 					if (Input.GetKeyDown (JumpKey)) {
-						action.verticalVelocity = 15;
-						moveVector.x = inputDirection_x;
-						moveVector.z = inputDirection_z;
+						action.verticalVelocity = 10;
+						action.moveVector.x = inputDirection_x;
+						action.moveVector.z = inputDirection_z;
 						anim.Jump ();
 						playerState.SetState (PLAYERSTATE.JUMPING);
 					} else if (Input.GetKeyDown (PunchKey)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
@@ -153,8 +169,8 @@ public class Player : MonoBehaviour {
 							anim.Sprint ();
 							playerState.SetState (PLAYERSTATE.SPRINTING);
 							inputDirection_x = dir * speed * 2;
-							moveVector.x = inputDirection_x;
-							moveVector.z = inputDirection_z;
+							action.moveVector.x = inputDirection_x;
+							action.moveVector.z = inputDirection_z;
 						} else {
 							leftLastTapTime = Time.time;
 						}
@@ -164,8 +180,8 @@ public class Player : MonoBehaviour {
 							anim.Sprint ();
 							playerState.SetState (PLAYERSTATE.SPRINTING);
 							inputDirection_x = dir * speed * 2;
-							moveVector.x = inputDirection_x;
-							moveVector.z = inputDirection_z;
+							action.moveVector.x = inputDirection_x;
+							action.moveVector.z = inputDirection_z;
 						} else {
 							rightLastTapTime = Time.time;
 						}
@@ -177,19 +193,20 @@ public class Player : MonoBehaviour {
 					} else {
 						anim.Walk ();
 						playerState.SetState (PLAYERSTATE.MOVING);
-						moveVector.x = inputDirection_x;
-						moveVector.z = inputDirection_z;
+						action.moveVector.x = inputDirection_x;
+						action.moveVector.z = inputDirection_z;
 					}
 				}
 			}
 
 		} else {
 			action.verticalVelocity -= gravity;
-			moveVector.x = lastMotion.x;
-			moveVector.z = lastMotion.z;
+
 
 			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			} else {
+				action.moveVector.x = lastMotion.x;
+				action.moveVector.z = lastMotion.z;
 				if (playerState.currentState != PLAYERSTATE.JUMPKICK && Input.GetKeyDown (PunchKey)) { 
 					doJumpKick = true;
 				}
@@ -206,9 +223,9 @@ public class Player : MonoBehaviour {
 //		}
 //
 
-		moveVector.y = action.verticalVelocity;
-		action.move (moveVector);
-		lastMotion = moveVector;
+		action.moveVector.y = action.verticalVelocity;
+		action.move ();
+		lastMotion = action.moveVector;
 
 		staminaBar.GetComponentsInChildren<StaminaBar> ()[0].UpdateBar (stamina.CurrentStamina, stamina.MaxStamina);
 

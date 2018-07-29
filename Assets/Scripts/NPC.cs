@@ -11,7 +11,6 @@ public class NPC : MonoBehaviour {
 	private PlayerState playerState;
 	private Action action;
 
-	private Vector3 moveVector;
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
@@ -34,14 +33,16 @@ public class NPC : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		moveVector = Vector3.zero;
-
+		action.moveVector = Vector3.zero;
+		action.verticalVelocity -= gravity;
 
 		if (!controller.isGrounded) { // not reliable
 			//		if (!IsControllerGrounded()) { // mine is bugged
-			action.verticalVelocity -= gravity;
-			moveVector.x = lastMotion.x;
-			moveVector.z = lastMotion.z;
+			if (playerState.currentState != PLAYERSTATE.KNOCKBACK) {
+				
+				action.moveVector.x = lastMotion.x;
+				action.moveVector.z = lastMotion.z;
+			}
 		} else {
 			if (playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 				if (action.verticalVelocity < 1f) {
@@ -51,9 +52,9 @@ public class NPC : MonoBehaviour {
 			}
 		}
 
-		moveVector.y = action.verticalVelocity;
-		action.move (moveVector * Time.deltaTime);
-		lastMotion = moveVector;
+		action.moveVector.y = action.verticalVelocity;
+		action.move ();
+		lastMotion = action.moveVector;
 
 	}
 

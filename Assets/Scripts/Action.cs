@@ -6,7 +6,7 @@ public class Action : MonoBehaviour {
 
 	public bool facingRight;
 
-	private Vector3 moveVector;
+	public Vector3 moveVector;
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
@@ -43,13 +43,14 @@ public class Action : MonoBehaviour {
 		facingRight = true;
 	}
 
-	public void move(Vector3 moveVector) {
+	public void move() {
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
 		Flip (moveVector.x);
 	}
 
 	public void StopDefend() {
+		print ("HERE");
 		anim.StopDefend ();
 		playerState.SetState (PLAYERSTATE.IDLE);
 	}
@@ -91,11 +92,11 @@ public class Action : MonoBehaviour {
 
 	public void ShengLongBa() {
 		anim.ShengLongBa ();
-		DamageObject d1 = new DamageObject (20, this.gameObject, 0.5f, Vector3.down, 0.01f, 3f);
+		DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
 		d1.attackType = AttackType.KnockDown;
 		d1.lag = 0f;
 		CheckForHit (d1);
-		DamageObject d2 = new DamageObject (20, this.gameObject, 0.5f, Vector3.down, 0.01f, 0.5f);
+		DamageObject d2 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 0.5f);
 		d2.lag = 0.1f;
 		CheckForHit (d2);
 	}
@@ -159,21 +160,25 @@ public class Action : MonoBehaviour {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
 			anim.ShowHitEffect ();
 
+			moveVector.x = 0;
+			moveVector.z = 0;
+			verticalVelocity = 0;
+
 			if (d.attackType == AttackType.KnockDown) {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);
 				KnockBack (d.inflictor);
 
 				if(isFacingTarget(d.inflictor)){ 
 					verticalVelocity = 5f;
-					anim.AddForce(-0.05f, facingRight);
+					anim.AddForce(-d.force*20, facingRight);
 				} else {
 					verticalVelocity = 5f;
-					anim.AddForce(0.05f, facingRight);
+					anim.AddForce(d.force*20, facingRight);
 				}
 
 				if (d.verticalForce != 0f) {
 //					anim.AddVerticalForce (d.verticalForce, facingRight);
-					verticalVelocity = 15f;
+					verticalVelocity = 10f;
 				}
 
 			} else {
@@ -226,6 +231,7 @@ public class Action : MonoBehaviour {
 	}
 
 	public void Ready(string animName) {
+
 		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			if (animName == "PlayerKnockDown") {
 //				controller.enabled = true;

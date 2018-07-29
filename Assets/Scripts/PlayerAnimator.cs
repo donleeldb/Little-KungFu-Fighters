@@ -5,9 +5,11 @@ using System.Collections;
 public class PlayerAnimator : MonoBehaviour {
 
 	private Animator animator;
+	private Action action;
 
 	void Awake() {
 		animator = GetComponent<Animator> ();
+		action = GetComponentsInParent<Action> ()[0];
 	}
 
 	public void Idle() {
@@ -144,12 +146,15 @@ public class PlayerAnimator : MonoBehaviour {
 			direction = Vector3.up;
 		}
 
-		while (t < 1) {
+		while (t < 1 || !controller.isGrounded) {
+			print (MathUtilities.Sinerp (0, 1, t));
+//			controller.Move (direction * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
+			controller.Move (direction * Mathf.Lerp (force, 0, 0.5f));
 
-			controller.Move (direction * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
 			t += Time.deltaTime * speed;
 			yield return null;
 		}
+
 	}
 }
 
