@@ -1,0 +1,52 @@
+上下左右：移动
+
+左左：跑
+右右：跑
+
+攻跳防
+
+式：疗伤 and for combos
+
+式+上上/下下：side-step
+
+式+左左/右右：back-step/close up
+
+式+上/左/右/下+攻：攻击招式
+
+式+上/左/右/下+跳：轻功
+
+式+上/左/右/下+防：架招
+
+Combat States：
+
+Idle
+轻伤 
+重伤 
+破防  扣内力 
+打飞 
+倒地 （take more damage but 无敌 while on the ground）
+定身  
+
+对掌：双方扣耐力（通过内功结算速度）耐力先耗完者被打飞
+
+Combat States' Actions during 硬直:
+
+Idle： 移动/攻/跳/防
+轻伤： 移动/攻/跳/防 
+重伤：  移动/防
+破防： 移动/攻/跳
+打飞： 跳
+破防： 移动/攻/跳
+倒地： 
+定身： 
+
+
+
+Attributes：
+
+外功：stamina
+内功：damage
+轻功：movement speed
+
+
+
