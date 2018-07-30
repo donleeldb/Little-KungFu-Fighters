@@ -77,6 +77,14 @@ public class Action : MonoBehaviour {
 		CheckForHit (d);
 	}
 
+	public void DoStagger() {
+		playerState.SetState (PLAYERSTATE.STAGGER);
+		anim.Stagger ();
+		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, Vector3.zero, 0.005f);
+		d.attackType = AttackType.Stagger;
+		CheckForHit (d);
+	}
+
 	public void DoJumpKick() {
 		playerState.SetState (PLAYERSTATE.JUMPKICK);
 		anim.JumpKick ();
@@ -122,7 +130,20 @@ public class Action : MonoBehaviour {
 		if(playerState.currentState == PLAYERSTATE.DEFENDING){
 			wasHit = false;
 			UpdateDefenseCounter ();
-			if (DefenseCount >= DefenseThreshold) { 
+
+			if (d.attackType == AttackType.Stagger) {
+				wasHit = true;
+				anim.Staggered ();
+				playerState.SetState (PLAYERSTATE.STAGGERED);
+				if(isFacingTarget(d.inflictor)){ 
+					anim.AddForce(-0.005f, facingRight);
+				} else {
+					anim.AddForce(0.005f, facingRight);
+				}
+				DefenseCount = 0;
+				return;
+
+			} else if (DefenseCount >= DefenseThreshold) { 
 				wasHit = true;
 				anim.StopDefend();
 				DefenseCount = 0;
@@ -147,6 +168,11 @@ public class Action : MonoBehaviour {
 		if (playerState.currentState == PLAYERSTATE.PUNCH) {
 			wasHit = false;
 		}
+
+		//probably not necessary
+//		if (playerState.currentState == PLAYERSTATE.STAGGER && d.attackType != AttackType.Stagger) {
+//			wasHit = true;
+//		}
 
 		if (wasHit) {
 			UpdateHitCounter ();
@@ -238,24 +264,34 @@ public class Action : MonoBehaviour {
 		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			if (animName == "PlayerKnockDown") {
 //				controller.enabled = true;
+				anim.Idle ();
+				playerState.SetState (PLAYERSTATE.IDLE);
 			} else { //Hit's ready call, do nothing if knocked down.
 				return;
 			}
 
-		}
+		} else if (playerState.currentState == PLAYERSTATE.PUNCH && (animName == "PlayerPunch0" || animName == "PlayerPunch1" || animName == "PlayerPunch2")) {
+			if (continuePunchCombo) {
+				DamageObject d = new DamageObject (20, this.gameObject, 0.3f, Vector3.zero, 0.005f);
+				CheckForHit (d);
+				doPunchAttack ();
+				continuePunchCombo = false;
 
-		if (continuePunchCombo) {
-			DamageObject d = new DamageObject (20, this.gameObject, 0.3f, Vector3.zero, 0.005f);
-			CheckForHit (d);
-			doPunchAttack ();
-			continuePunchCombo = false;
-
-		} else {
-			attackNum = 0;
+			} else {
+				attackNum = 0;
+				anim.Idle ();
+				playerState.SetState (PLAYERSTATE.IDLE);
+			}
+		} else if ((playerState.currentState == PLAYERSTATE.STAGGERED && animName == "PlayerStaggered") || 
+					(playerState.currentState == PLAYERSTATE.HIT && animName == "PlayerHit") ||
+					(playerState.currentState == PLAYERSTATE.STAGGER && animName == "PlayerStagger" )) {
 			anim.Idle ();
 			playerState.SetState (PLAYERSTATE.IDLE);
+		} 
 
-		}
+
+
+	
 
 	}
 

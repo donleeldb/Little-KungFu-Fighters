@@ -35,6 +35,13 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));
 	}
 
+	public void Stagger() {
+		animator.SetBool("Walk", false);
+		animator.SetTrigger ("Stagger");
+		animator.ResetTrigger("Idle");
+		StartCoroutine (WaitForAnimationFinish ("PlayerStagger"));
+	}
+
 	public void JumpKick() {
 		animator.SetTrigger ("JumpKick");
 	}
@@ -51,6 +58,7 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void StopDefend() {		
 		animator.SetBool ("Defend", false);
+		animator.SetTrigger ("Idle");
 	}
 
 	public void Jump() {
@@ -82,6 +90,14 @@ public class PlayerAnimator : MonoBehaviour {
 	public void KnockDown() {
 		animator.SetTrigger ("KnockDown");
 		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
+	}
+
+	public void Staggered() {
+		animator.ResetTrigger ("Idle");
+
+		animator.SetBool ("Defend", false);
+		animator.SetTrigger ("Staggered");
+		StartCoroutine (WaitForAnimationFinish ("PlayerStaggered"));
 	}
 
 	//show hit effect
@@ -147,7 +163,6 @@ public class PlayerAnimator : MonoBehaviour {
 		}
 
 		while (t < 1 || !controller.isGrounded) {
-			print (MathUtilities.Sinerp (0, 1, t));
 //			controller.Move (direction * Mathf.Lerp (force, 0, MathUtilities.Sinerp (0, 1, t)));
 			controller.Move (direction * Mathf.Lerp (force, 0, 0.5f));
 

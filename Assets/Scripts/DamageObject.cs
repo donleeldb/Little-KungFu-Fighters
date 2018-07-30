@@ -39,10 +39,7 @@ public enum AttackType {
 	SoftPunch = 10,
 	MediumPunch = 20,
 	KnockDown = 30,
-	SoftKick = 40,
-	HardKick = 50,
-	SpecialMove = 60,
-	DeathBlow = 70,
+	Stagger = 10,
 };
 
 

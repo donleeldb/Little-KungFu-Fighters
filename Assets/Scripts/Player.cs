@@ -23,6 +23,7 @@ public class Player : MonoBehaviour {
 	private bool doPunch = false;
 	private bool doJumpKick = false;
 	private bool doSprintPunch = false;
+	private bool doStagger = false;
 
 	private Vector3 lastMotion;
 	private CharacterController controller;
@@ -86,7 +87,7 @@ public class Player : MonoBehaviour {
 //		if (IsControllerGrounded()) { // mine is bugged
 
 			//took away hit because you can now move when 轻伤
-			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN) {
+			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.STAGGER || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER) {
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
 				print (action.verticalVelocity);
@@ -187,6 +188,10 @@ public class Player : MonoBehaviour {
 							action.moveVector.x = dir * 2;
 							action.ShengLongBa ();
 							playerState.SetState (PLAYERSTATE.JUMPING);
+						}
+					} else if (Input.GetKey (Up) && Input.GetKeyDown (DefendKey)) {
+						if (checkStamina (10)) {
+							doStagger = true;
 						}
 					} else if (Input.GetKeyDown (Up)) {
 
@@ -309,12 +314,19 @@ public class Player : MonoBehaviour {
 				action.DoJumpKick ();
 			}
 		} else if (doSprintPunch) {
-			action.DoSprintPunch ();
+			if (checkStamina (10)) {
+				action.DoSprintPunch ();
+			}
+		} else if (doStagger) {
+			if (checkStamina (10)) {
+				action.DoStagger ();
+			}
 		}
 		doPunch = false;
 		continuePunch = false;
 		doJumpKick = false;
 		doSprintPunch = false;
+		doStagger = false;
 	}
 
 	private void IdleWalkInputManagement(int dir) {
