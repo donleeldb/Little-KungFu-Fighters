@@ -240,6 +240,11 @@ Prefab:
       propertyPath: staminaBar
       value: 
       objectReference: {fileID: 333024113}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: "\u5F0FKey"
+      value: 117
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
   m_IsPrefabParent: 0
@@ -431,6 +436,11 @@ Prefab:
     - target: {fileID: 1618301822501736, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: "\u5F0FKey"
+      value: 118
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 54168740462505962, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}

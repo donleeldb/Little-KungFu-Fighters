@@ -43,10 +43,13 @@ public class Action : MonoBehaviour {
 		facingRight = true;
 	}
 
-	public void move() {
+	public void move(bool flip = true) {
 		moveVector.y = verticalVelocity;
 		controller.Move (moveVector * Time.deltaTime);
-		Flip (moveVector.x);
+		if (flip) {
+			Flip (moveVector.x);
+
+		}
 	}
 
 	public void StopDefend() {
