@@ -135,6 +135,7 @@ public class Action : MonoBehaviour {
 				wasHit = true;
 				anim.Staggered ();
 				playerState.SetState (PLAYERSTATE.STAGGERED);
+                anim.ShowStaggerEffect();
 				if(isFacingTarget(d.inflictor)){ 
 					anim.AddForce(-0.005f, facingRight);
 				} else {
@@ -144,9 +145,19 @@ public class Action : MonoBehaviour {
 				return;
 
 			} else if (DefenseCount >= DefenseThreshold) { 
-				wasHit = true;
-				anim.StopDefend();
-				DefenseCount = 0;
+                anim.Staggered();
+                playerState.SetState(PLAYERSTATE.STAGGERED);
+                anim.ShowStaggerEffect();
+                if (isFacingTarget(d.inflictor))
+                {
+                    anim.AddForce(-0.005f, facingRight);
+                }
+                else
+                {
+                    anim.AddForce(0.005f, facingRight);
+                }
+                DefenseCount = 0;
+                return;
 			} else {
 //			if(BlockAttacksFromBehind || isFacingTarget (d.inflictor)) wasHit = false;
 //			if(!wasHit){
@@ -166,6 +177,7 @@ public class Action : MonoBehaviour {
 
 		//parry //need to add math for different types of attack
 		if (playerState.currentState == PLAYERSTATE.PUNCH) {
+            anim.ShowParryEffect();
 			wasHit = false;
 		}
 

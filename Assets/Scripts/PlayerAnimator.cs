@@ -105,6 +105,18 @@ public class PlayerAnimator : MonoBehaviour {
 		GameObject.Instantiate (Resources.Load ("HitEffect"), transform.position, Quaternion.identity);
 	}
 
+    //show hit effect
+    public void ShowStaggerEffect()
+    {
+        GameObject.Instantiate(Resources.Load("StaggerEffect"), transform.position, Quaternion.identity);
+    }
+
+    //show hit effect
+    public void ShowParryEffect()
+    {
+        GameObject.Instantiate(Resources.Load("ParryEffect"), transform.position, Quaternion.identity);
+    }
+
 	//show defend effect
 	public void ShowDefendEffect() {
 //		Vector3 offset = Vector3.up * 1.7f + Vector3.right * (int)transform.parent.GetComponent<PlayerMovement> ().getCurrentDirection () * .2f;

@@ -87,7 +87,7 @@ public class Player : MonoBehaviour {
 //		if (IsControllerGrounded()) { // mine is bugged
 
 			//took away hit because you can now move when 轻伤
-			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.STAGGER || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER) {
+			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER) {
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
 				print (action.verticalVelocity);
