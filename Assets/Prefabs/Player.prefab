@@ -263,16 +263,16 @@ MonoBehaviour:
   tapSpeed: 0.2
   facingRight: 0
   staminaBar: {fileID: 0}
-  Left: 276
-  Right: 275
-  Up: 273
-  Down: 274
-  PunchKey: 109
-  JumpKey: 110
-  DefendKey: 98
-  "\u5F0FKey": 118
-  horizontal: Horizontal2
-  depth: Depth2
+  Left: 97
+  Right: 100
+  Up: 119
+  Down: 115
+  PunchKey: 114
+  JumpKey: 116
+  DefendKey: 121
+  "\u5F0FKey": 117
+  horizontal: Horizontal
+  depth: Depth
 --- !u!114 &114994877258441862
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -177,56 +177,6 @@ Prefab:
       propertyPath: staminaBar
       value: 
       objectReference: {fileID: 333024113}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: Left
-      value: 97
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: Right
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: Up
-      value: 119
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: Down
-      value: 115
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: PunchKey
-      value: 114
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: JumpKey
-      value: 116
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: DefendKey
-      value: 121
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: "\u5F0FKey"
-      value: 117
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: horizontal
-      value: Horizontal
-      objectReference: {fileID: 0}
-    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: depth
-      value: Depth
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
   m_IsPrefabAsset: 0
@@ -424,6 +374,56 @@ Prefab:
     - target: {fileID: 1659340576657906, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
       propertyPath: m_Name
       value: Player (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: Left
+      value: 276
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: Right
+      value: 275
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: Up
+      value: 273
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: Down
+      value: 274
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: PunchKey
+      value: 109
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: JumpKey
+      value: 110
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: DefendKey
+      value: 98
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: "\u5F0FKey"
+      value: 118
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: horizontal
+      value: Horizontal2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114670547074572622, guid: 182245ae3e3c14b808a2716c779ea4ad,
+        type: 2}
+      propertyPath: depth
+      value: Depth2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
