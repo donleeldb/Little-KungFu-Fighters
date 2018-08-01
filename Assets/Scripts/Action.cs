@@ -296,7 +296,8 @@ public class Action : MonoBehaviour {
 			}
 		} else if ((playerState.currentState == PLAYERSTATE.STAGGERED && animName == "PlayerStaggered") || 
 					(playerState.currentState == PLAYERSTATE.HIT && animName == "PlayerHit") ||
-					(playerState.currentState == PLAYERSTATE.STAGGER && animName == "PlayerStagger" )) {
+					(playerState.currentState == PLAYERSTATE.STAGGER && animName == "PlayerStagger" ) ||
+                   (playerState.currentState == PLAYERSTATE.SPRINTPUNCH && animName == "PlayerSprintAttack")) {
 			anim.Idle ();
 			playerState.SetState (PLAYERSTATE.IDLE);
 		} 
