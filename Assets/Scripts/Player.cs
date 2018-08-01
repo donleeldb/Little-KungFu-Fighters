@@ -329,6 +329,15 @@ public class Player : MonoBehaviour {
 		doStagger = false;
 	}
 
+    private void listenForAttackInput(){
+        return;
+    }
+
+    private void listenForAttackComboInput()
+    {
+        return;
+    }
+
 	private void IdleWalkInputManagement(int dir) {
 		if (Input.GetKeyDown (JumpKey)) {
 			action.verticalVelocity = 10;
