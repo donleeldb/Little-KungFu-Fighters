@@ -16,7 +16,7 @@ public class Action : MonoBehaviour {
 	private Stamina stamina;
 
 	private int attackNum = 0; //the current attack number
-	private bool continuePunchCombo; //true if a punch combo needs to continue
+	private bool continueAttackCombo; //true if a punch combo needs to continue
 	private float LastAttackTime = 0;
 	private bool targetHit; //true if the last hit has hit a target
 
@@ -53,7 +53,6 @@ public class Action : MonoBehaviour {
 	}
 
 	public void StopDefend() {
-		print ("HERE");
 		anim.StopDefend ();
 		playerState.SetState (PLAYERSTATE.IDLE);
 	}
@@ -63,16 +62,16 @@ public class Action : MonoBehaviour {
 		playerState.SetState (PLAYERSTATE.DEFENDING);
 	}
 
-	public void ContinuePunch() {
+	public void ContinueAttack() {
 		
-		continuePunchCombo = true;
+		continueAttackCombo = true;
 		if (attackNum == 2)
-			continuePunchCombo = false;
+			continueAttackCombo = false;
 	}
 
-	public void DoPunch() {
-		playerState.SetState (PLAYERSTATE.PUNCH);
-		anim.Punch (0);
+	public void DoAttack() {
+		playerState.SetState (PLAYERSTATE.ATTACK);
+		anim.Attack (0);
 		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, Vector3.zero, 0.005f);
 		CheckForHit (d);
 	}
@@ -85,23 +84,56 @@ public class Action : MonoBehaviour {
 		CheckForHit (d);
 	}
 
-	public void DoJumpKick() {
-		playerState.SetState (PLAYERSTATE.JUMPKICK);
-		anim.JumpKick ();
+	public void DoJumpAttack() {
+		playerState.SetState (PLAYERSTATE.JUMPATTACK);
+		anim.JumpAttack ();
 		DamageObject d = new DamageObject (20, this.gameObject, 0.5f, Vector3.zero, 0.01f);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
 
-	public void DoSprintPunch() {
-		playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
-		anim.SprintPunch ();
+    public void DoJump(float inputDirection_x, float inputDirection_z)
+    {
+        verticalVelocity = 10;
+        moveVector.x = inputDirection_x;
+        moveVector.z = inputDirection_z;
+        anim.Jump();
+        playerState.SetState(PLAYERSTATE.JUMPING);
+    }
+
+    public void DoSideStep(float speed, float inputDirection_z)
+    {
+        verticalVelocity = 2;
+        moveVector.x = 0;
+        moveVector.z = inputDirection_z * speed;
+        anim.Jump();
+        playerState.SetState(PLAYERSTATE.JUMPING);
+    }
+
+    public void DoVerticalStep(float speed, float inputDirection_x)
+    {
+        verticalVelocity = 2;
+        moveVector.x = inputDirection_x * speed;
+        moveVector.z = 0;
+        anim.Jump();
+        playerState.SetState(PLAYERSTATE.JUMPING);
+    }
+
+
+
+	public void DoSprintAttack() {
+		playerState.SetState (PLAYERSTATE.SPRINTATTACK);
+		anim.SprintAttack ();
 		DamageObject d = new DamageObject (20, this.gameObject, 1.5f, Vector3.zero, 0.01f);
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
 
-	public void ShengLongBa() {
+	public void ShengLongBa(int dir) {
+        verticalVelocity = 10;
+        moveVector.x = dir * 2;
+        playerState.SetState(PLAYERSTATE.JUMPING);
+
 		anim.ShengLongBa ();
 		DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
 		d1.attackType = AttackType.KnockDown;
@@ -111,6 +143,24 @@ public class Action : MonoBehaviour {
 		d2.lag = 0.1f;
 		CheckForHit (d2);
 	}
+
+    public void SprintLeft(float speed, int dir, float inputDirection_x, float inputDirection_z)
+    {
+        anim.Sprint();
+        playerState.SetState(PLAYERSTATE.SPRINTING);
+        inputDirection_x = dir * speed * 2;
+        moveVector.x = inputDirection_x;
+        moveVector.z = inputDirection_z;
+    }
+
+    public void SprintRight(float speed, int dir, float inputDirection_x, float inputDirection_z)
+    {
+        anim.Sprint();
+        playerState.SetState(PLAYERSTATE.SPRINTING);
+        inputDirection_x = dir * speed * 2;
+        moveVector.x = inputDirection_x;
+        moveVector.z = inputDirection_z;
+    }
 		
 	public void getHit(DamageObject d) {
 
@@ -176,7 +226,7 @@ public class Action : MonoBehaviour {
 		}
 
 		//parry //need to add math for different types of attack
-		if (playerState.currentState == PLAYERSTATE.PUNCH) {
+		if (playerState.currentState == PLAYERSTATE.ATTACK) {
             anim.ShowParryEffect();
 			wasHit = false;
 		}
@@ -282,12 +332,12 @@ public class Action : MonoBehaviour {
 				return;
 			}
 
-		} else if (playerState.currentState == PLAYERSTATE.PUNCH && (animName == "PlayerPunch0" || animName == "PlayerPunch1" || animName == "PlayerPunch2")) {
-			if (continuePunchCombo) {
+		} else if (playerState.currentState == PLAYERSTATE.ATTACK && (animName == "PlayerAttack0" || animName == "PlayerAttack1" || animName == "PlayerAttack2")) {
+			if (continueAttackCombo) {
 				DamageObject d = new DamageObject (20, this.gameObject, 0.3f, Vector3.zero, 0.005f);
 				CheckForHit (d);
-				doPunchAttack ();
-				continuePunchCombo = false;
+				doAttack ();
+				continueAttackCombo = false;
 
 			} else {
 				attackNum = 0;
@@ -297,7 +347,7 @@ public class Action : MonoBehaviour {
 		} else if ((playerState.currentState == PLAYERSTATE.STAGGERED && animName == "PlayerStaggered") || 
 					(playerState.currentState == PLAYERSTATE.HIT && animName == "PlayerHit") ||
 					(playerState.currentState == PLAYERSTATE.STAGGER && animName == "PlayerStagger" ) ||
-                   (playerState.currentState == PLAYERSTATE.SPRINTPUNCH && animName == "PlayerSprintAttack")) {
+                   (playerState.currentState == PLAYERSTATE.SPRINTATTACK && animName == "PlayerSprintAttack")) {
 			anim.Idle ();
 			playerState.SetState (PLAYERSTATE.IDLE);
 		} 
@@ -310,9 +360,7 @@ public class Action : MonoBehaviour {
 
 	//returns the next attack number in the combo chain
 	private int GetNextAttackNum() {
-		if (playerState.currentState == PLAYERSTATE.PUNCH) {
-			//			attackNum = Mathf.Clamp (attackNum += 1, 0, PunchAttackData.Length - 1);
-			//			if (Time.time - LastAttackTime > KickAttackData [attackNum].comboResetTime || !targetHit)
+		if (playerState.currentState == PLAYERSTATE.ATTACK) {
 
 			attackNum = Mathf.Clamp (attackNum + 1, 0, 2); // it's not clamping but if num greater than 2 animator fails.
 
@@ -323,11 +371,11 @@ public class Action : MonoBehaviour {
 	}
 
 	//do a punch attack
-	private void doPunchAttack() {
-		playerState.SetState (PLAYERSTATE.PUNCH);
-		anim.Punch (GetNextAttackNum ());
+	private void doAttack() {
+		playerState.SetState (PLAYERSTATE.ATTACK);
+		anim.Attack (GetNextAttackNum ());
 		if (attackNum == 2)
-			continuePunchCombo = false;
+			continueAttackCombo = false;
 		//		LastAttackTime = Time.time; // not using this rn
 	}
 

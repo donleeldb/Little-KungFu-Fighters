@@ -9,7 +9,6 @@ public class DamageObject {
 	public Vector3 centerOffset;
 	public AttackType attackType;
 	public GameObject inflictor;
-	public float comboResetTime = .5f;
 	public float force = 0.01f;
 	public float verticalForce = 0f;
 	public float lag = 0.1f; // time before shooting raycast

@@ -19,10 +19,10 @@ public class Player : MonoBehaviour {
 
 
 	public bool facingRight;
-	private bool continuePunch = false;
-	private bool doPunch = false;
-	private bool doJumpKick = false;
-	private bool doSprintPunch = false;
+	private bool continueAttack = false;
+	private bool doAttack = false;
+	private bool doJumpAttack = false;
+	private bool doSprintAttack = false;
 	private bool doStagger = false;
 
 	private Vector3 lastMotion;
@@ -39,7 +39,7 @@ public class Player : MonoBehaviour {
 	public KeyCode Right;
 	public KeyCode Up;
 	public KeyCode Down;
-	public KeyCode PunchKey;
+	public KeyCode AttackKey;
 	public KeyCode JumpKey;
 	public KeyCode DefendKey;
 	public KeyCode 式Key;
@@ -86,11 +86,9 @@ public class Player : MonoBehaviour {
 
 //		if (IsControllerGrounded()) { // mine is bugged
 
-			//took away hit because you can now move when 轻伤
 			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER) {
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
-				print (action.verticalVelocity);
 				if (action.verticalVelocity < 1f) {
 					playerState.currentState = PLAYERSTATE.KNOCKDOWN;
 					anim.KnockDown ();
@@ -104,55 +102,38 @@ public class Player : MonoBehaviour {
 				if ((Input.GetKeyDown (Left) && action.facingRight) || Input.GetKeyDown (Right) && !action.facingRight) {
 					anim.Idle ();
 					playerState.SetState (PLAYERSTATE.IDLE);
-				} else if (Input.GetKeyDown (PunchKey)) {
-					doSprintPunch = true;
+				} else if (Input.GetKeyDown (AttackKey)) {
+					doSprintAttack = true;
 				} else if (Input.GetKeyDown (JumpKey)) {
-					action.verticalVelocity = 10;
-					action.moveVector.x = inputDirection_x;
-					action.moveVector.z = inputDirection_z;
-					anim.Jump ();
-					playerState.SetState (PLAYERSTATE.JUMPING);
+                    action.DoJump(inputDirection_x, inputDirection_z);
 				} else {
 					inputDirection_x = dir * speed * 2;
 					action.moveVector.x = inputDirection_x;
 					action.moveVector.z = inputDirection_z;
 				}
 					
-			} else if (playerState.currentState == PLAYERSTATE.PUNCH) { // when attacking, can't do anything else except for keep attacking
+			} else if (playerState.currentState == PLAYERSTATE.ATTACK) { // when attacking, can't do anything else except for keep attacking
 				if (Input.GetKey (式Key)) {
-					if (Input.GetKey (PunchKey) && Input.GetKeyDown (Up)) {
+					if (Input.GetKey (AttackKey) && Input.GetKeyDown (Up)) {
 						if (checkStamina (10)) {
-							action.verticalVelocity = 10;
-							action.moveVector.x = dir * 2;
-							action.ShengLongBa ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
+							action.ShengLongBa (dir);
 						}
-					} else if (Input.GetKey (Up) && Input.GetKeyDown (PunchKey)) {
+					} else if (Input.GetKey (Up) && Input.GetKeyDown (AttackKey)) {
 						if (checkStamina (10)) {
-							action.verticalVelocity = 10;
-							action.moveVector.x = dir * 2;
-							action.ShengLongBa ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
+							
+							action.ShengLongBa (dir);
 						}
 					} else if (Input.GetKeyDown (Up)) {
 
 						if ((Time.time - upLastTapTime) < tapSpeed) {
-							action.verticalVelocity = 2;
-							action.moveVector.x = 0;
-							action.moveVector.z = inputDirection_z * speed;
-							anim.Jump ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
+                            action.DoSideStep(speed, inputDirection_z);
 						} else {
 							upLastTapTime = Time.time;
 						}
 
 					} else if (Input.GetKeyDown (Down)) {
 						if ((Time.time - downLastTapTime) < tapSpeed) {
-							action.verticalVelocity = 2;
-							action.moveVector.x = 0;
-							action.moveVector.z = inputDirection_z * speed;
-							anim.Jump ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
+                            action.DoSideStep(speed, inputDirection_z);
 						} else {
 							downLastTapTime = Time.time;
 						}
@@ -162,98 +143,18 @@ public class Player : MonoBehaviour {
 						playerState.SetState (PLAYERSTATE.IDLE);
 
 					}
-				} else if (Input.GetKeyDown (PunchKey)) {
-					continuePunch = true;
+				} else if (Input.GetKeyDown (AttackKey)) {
+					continueAttack = true;
 				}
-			} else if (playerState.currentState == PLAYERSTATE.SPRINTPUNCH) {
+			} else if (playerState.currentState == PLAYERSTATE.SPRINTATTACK) {
 				inputDirection_x = dir * speed;
 				action.moveVector.x = inputDirection_x;
-			} else { // right now is idle, walk
+            }
+            else
+            { // right now is idle, walk
 
-
-				if (Input.GetKey (式Key)) {
-					if (Input.GetKey (PunchKey) && Input.GetKeyDown (Up)) {
-						if (checkStamina (10)) {
-							action.verticalVelocity = 10;
-							action.moveVector.x = dir * 2;
-							action.ShengLongBa ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
-						}
-					} else if (Input.GetKey (Up) && Input.GetKeyDown (PunchKey)) {
-						if (checkStamina (10)) {
-							action.verticalVelocity = 10;
-							action.moveVector.x = dir * 2;
-							action.ShengLongBa ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
-						}
-					} else if (Input.GetKey (Up) && Input.GetKeyDown (DefendKey)) {
-						if (checkStamina (10)) {
-							doStagger = true;
-						}
-					} else if (Input.GetKeyDown (Up)) {
-
-						if ((Time.time - upLastTapTime) < tapSpeed) {
-							action.verticalVelocity = 2;
-							action.moveVector.x = 0;
-							action.moveVector.z = inputDirection_z * speed;
-							anim.Jump ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
-						} else {
-							upLastTapTime = Time.time;
-						}
-
-					} else if (Input.GetKeyDown (Down)) {
-						if ((Time.time - downLastTapTime) < tapSpeed) {
-							action.verticalVelocity = 2;
-							action.moveVector.x = 0;
-							action.moveVector.z = inputDirection_z * speed;
-							anim.Jump ();
-							playerState.SetState (PLAYERSTATE.JUMPING);
-						} else {
-							downLastTapTime = Time.time;
-						}
-					
-					} else if (Input.GetKeyDown (Left)) {
-						if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
-							if ((Time.time - leftLastTapTime) < tapSpeed) {
-								action.verticalVelocity = 2;
-								action.moveVector.x = inputDirection_x * speed;
-								action.moveVector.z = 0;
-								anim.Jump ();
-								playerState.SetState (PLAYERSTATE.JUMPING);
-							} else {
-								leftLastTapTime = Time.time;
-							}
-						}
-
-						if (dir == 1) {
-							flip = false;
-						}
-					
-					} else if (Input.GetKeyDown (Right)) {
-						if ((Time.time - rightLastTapTime) < tapSpeed) {
-							action.verticalVelocity = 2;
-							action.moveVector.x = inputDirection_x * speed;
-							action.moveVector.z = 0;
-							anim.Jump ();
-						} else {
-							rightLastTapTime = Time.time;
-						}
-						if (dir == -1) {
-							flip = false;
-						}
-
-					} else { 
-						// should probs change to 式 animation
-						anim.Idle ();
-						playerState.SetState (PLAYERSTATE.IDLE);
-
-					}
-				} else {
-					IdleWalkInputManagement (dir);
-				}
-
-			}
+                IdleWalkInputListner(dir);
+            }
 
 
 
@@ -263,23 +164,16 @@ public class Player : MonoBehaviour {
 
 			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
 			} else {
-				action.moveVector.x = lastMotion.x;
+				
+                action.moveVector.x = lastMotion.x;
 				action.moveVector.z = lastMotion.z;
-				if (playerState.currentState != PLAYERSTATE.JUMPKICK && Input.GetKeyDown (PunchKey)) { 
-					doJumpKick = true;
+				if (playerState.currentState != PLAYERSTATE.JUMPATTACK && Input.GetKeyDown (AttackKey)) { 
+					doJumpAttack = true;
 				}
 
-//				if (Input.GetKeyDown (DefendKey)) {
-//					playerState.SetState (PLAYERSTATE.DEFENDING);
-//				}
 			}
 		}
 
-		// cant remember why i put this here
-//		if (playerState.currentState == PLAYERSTATE.DEFENDING) {
-//			return;
-//		}
-//
 
 		action.moveVector.y = action.verticalVelocity;
 		action.move (flip);
@@ -298,158 +192,203 @@ public class Player : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if (doPunch) {
+		if (doAttack) {
 			if (checkStamina (10)) {
-				action.DoPunch ();
+				action.DoAttack ();
 			}
-		} else if (continuePunch) {
+		} else if (continueAttack) {
 			if (checkStamina (10)) {
-				action.ContinuePunch ();
+				action.ContinueAttack ();
 			}
-		} else if (doJumpKick) {
+		} else if (doJumpAttack) {
 			if (checkStamina (10)) {
-				action.DoJumpKick ();
+				action.DoJumpAttack ();
 			}
-		} else if (doSprintPunch) {
+		} else if (doSprintAttack) {
 			if (checkStamina (10)) {
-				action.DoSprintPunch ();
+				action.DoSprintAttack ();
 			}
 		} else if (doStagger) {
 			if (checkStamina (10)) {
 				action.DoStagger ();
 			}
 		}
-		doPunch = false;
-		continuePunch = false;
-		doJumpKick = false;
-		doSprintPunch = false;
+		doAttack = false;
+		continueAttack = false;
+		doJumpAttack = false;
+		doSprintAttack = false;
 		doStagger = false;
 	}
 
-    private void listenForAttackInput(){
-        return;
-    }
 
-    private bool listenForAttackComboInput(int dir)
+    private bool listenForMoveComboInput(int dir)
     {
-        if (Input.GetKey(式Key))
+        if (Input.GetKeyDown(Up))
         {
-            if (Input.GetKey(PunchKey) && Input.GetKeyDown(Up))
-            {
-                if (checkStamina(10))
-                {
-                    action.verticalVelocity = 10;
-                    action.moveVector.x = dir * 2;
-                    action.ShengLongBa();
-                    playerState.SetState(PLAYERSTATE.JUMPING);
-                }
-            }
-            else if (Input.GetKey(Up) && Input.GetKeyDown(PunchKey))
-            {
-                if (checkStamina(10))
-                {
-                    action.verticalVelocity = 10;
-                    action.moveVector.x = dir * 2;
-                    action.ShengLongBa();
-                    playerState.SetState(PLAYERSTATE.JUMPING);
-                }
-            }
-            else if (Input.GetKeyDown(Up))
-            {
 
-                if ((Time.time - upLastTapTime) < tapSpeed)
-                {
-                    action.verticalVelocity = 2;
-                    action.moveVector.x = 0;
-                    action.moveVector.z = inputDirection_z * speed;
-                    anim.Jump();
-                    playerState.SetState(PLAYERSTATE.JUMPING);
-                }
-                else
-                {
-                    upLastTapTime = Time.time;
-                }
-
-            }
-            else if (Input.GetKeyDown(Down))
+            if ((Time.time - upLastTapTime) < tapSpeed)
             {
-                if ((Time.time - downLastTapTime) < tapSpeed)
-                {
-                    action.verticalVelocity = 2;
-                    action.moveVector.x = 0;
-                    action.moveVector.z = inputDirection_z * speed;
-                    anim.Jump();
-                    playerState.SetState(PLAYERSTATE.JUMPING);
-                }
-                else
-                {
-                    downLastTapTime = Time.time;
-                }
+                action.DoSideStep(speed, inputDirection_z);
             }
             else
             {
-                // should probs change to 式 animation
-                anim.Idle();
-                playerState.SetState(PLAYERSTATE.IDLE);
-
+                upLastTapTime = Time.time;
             }
-
             return true;
         }
-        else if (Input.GetKeyDown(PunchKey))
+        else if (Input.GetKeyDown(Down))
         {
-            continuePunch = true;
+            if ((Time.time - downLastTapTime) < tapSpeed)
+            {
+                action.DoSideStep(speed, inputDirection_z);
+            }
+            else
+            {
+                downLastTapTime = Time.time;
+            }
+            return true;
+        }
+        else if (Input.GetKeyDown(Left))
+        {
+            if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE)
+            {
+                if ((Time.time - leftLastTapTime) < tapSpeed)
+                {
+                    action.DoVerticalStep(speed, inputDirection_x);
+                }
+                else
+                {
+                    leftLastTapTime = Time.time;
+                }
+            }
+
+            if (dir == 1)
+            {
+                flip = false;
+            }
+            return true;
+        }
+        else if (Input.GetKeyDown(Right))
+        {
+            if ((Time.time - rightLastTapTime) < tapSpeed)
+            {
+                action.DoVerticalStep(speed, inputDirection_x);
+
+            }
+            else
+            {
+                rightLastTapTime = Time.time;
+            }
+            if (dir == -1)
+            {
+                flip = false;
+            }
             return true;
         }
 
         return false;
     }
 
-	private void IdleWalkInputManagement(int dir) {
-		if (Input.GetKeyDown (JumpKey)) {
-			action.verticalVelocity = 10;
-			action.moveVector.x = inputDirection_x;
-			action.moveVector.z = inputDirection_z;
-			anim.Jump ();
-			playerState.SetState (PLAYERSTATE.JUMPING);
-		} else if (Input.GetKeyDown (PunchKey)) { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
-			// two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
-			doPunch = true;
-		} else if (Input.GetKeyDown (DefendKey)) {
-			anim.StartDefend ();
-			playerState.SetState (PLAYERSTATE.DEFENDING);
-		} else if (Input.GetKeyDown (Left)) {
+    private bool listenForAttackComboInput(int dir)
+    {
 
-			if ((Time.time - leftLastTapTime) < tapSpeed) {
-				anim.Sprint ();
-				playerState.SetState (PLAYERSTATE.SPRINTING);
-				inputDirection_x = dir * speed * 2;
-				action.moveVector.x = inputDirection_x;
-				action.moveVector.z = inputDirection_z;
-			} else {
-				leftLastTapTime = Time.time;
-			}
+        if (Input.GetKey(AttackKey) && Input.GetKeyDown(Up))
+        {
+            if (checkStamina(10))
+            {
+                action.ShengLongBa(dir);
+            }
+            return true;
+        }
+        else if (Input.GetKey(Up) && Input.GetKeyDown(AttackKey))
+        {
+            if (checkStamina(10))
+            {
+                action.ShengLongBa(dir);
+            }
+            return true;
+        } else if (Input.GetKey (Up) && Input.GetKeyDown(DefendKey)) {
+            if (checkStamina (10)) {
+                doStagger = true;
+            }
+            return true;
+        } else if (Input.GetKey(DefendKey) && Input.GetKeyDown(Up)) {
+            if (checkStamina(10))
+            {
+                doStagger = true;
+            }
+            return true;
+        }
 
-		} else if (Input.GetKeyDown (Right)) {
-			if ((Time.time - rightLastTapTime) < tapSpeed) {
-				anim.Sprint ();
-				playerState.SetState (PLAYERSTATE.SPRINTING);
-				inputDirection_x = dir * speed * 2;
-				action.moveVector.x = inputDirection_x;
-				action.moveVector.z = inputDirection_z;
-			} else {
-				rightLastTapTime = Time.time;
-			}
-		} else if (inputDirection_x == 0 && inputDirection_z == 0) {
-			anim.Idle ();
-			playerState.SetState (PLAYERSTATE.IDLE);
-		} else {
-			anim.Walk ();
-			playerState.SetState (PLAYERSTATE.MOVING);
-			action.moveVector.x = inputDirection_x;
-			action.moveVector.z = inputDirection_z;
-		}
-	}
+        return false;
+
+    }
+
+    private void IdleWalkInputListner (int dir) {
+
+        if (Input.GetKey(式Key))
+        {
+            if (listenForAttackComboInput(dir)) {
+            } else if (listenForMoveComboInput(dir)) {
+            } else {
+                anim.Idle();
+                playerState.SetState(PLAYERSTATE.IDLE);
+            }
+        } else {
+
+            if (Input.GetKeyDown(JumpKey))
+            {
+                action.DoJump(inputDirection_x, inputDirection_z);
+            }
+            else if (Input.GetKeyDown(AttackKey))
+            { // remove combo here rn. This means that if you didnt press attack during attack animation you dont get to combo. might change
+              // two method: 1) add lastAttackTime and allow combo if within time. 2) make attack animation include idle for a while (not recommended because you can't do anything else while punching)
+                doAttack = true;
+            }
+            else if (Input.GetKeyDown(DefendKey))
+            {
+                anim.StartDefend();
+                playerState.SetState(PLAYERSTATE.DEFENDING);
+            }
+            else if (Input.GetKeyDown(Left))
+            {
+                if ((Time.time - leftLastTapTime) < tapSpeed)
+                {
+                    action.SprintLeft(speed, dir, inputDirection_x, inputDirection_z);
+                }
+                else
+                {
+                    leftLastTapTime = Time.time;
+                }
+            }
+            else if (Input.GetKeyDown(Right))
+            {
+                if ((Time.time - rightLastTapTime) < tapSpeed)
+                {
+                    action.SprintRight(speed, dir, inputDirection_x, inputDirection_z);
+                }
+                else
+                {
+                    rightLastTapTime = Time.time;
+                }
+            }
+            else if (inputDirection_x == 0 && inputDirection_z == 0)
+            {
+                anim.Idle();
+                playerState.SetState(PLAYERSTATE.IDLE);
+            }
+            else
+            {
+                anim.Walk();
+                playerState.SetState(PLAYERSTATE.WALKING);
+                action.moveVector.x = inputDirection_x;
+                action.moveVector.z = inputDirection_z;
+            }
+        }
+
+    }
+        
+
 
 	private bool IsControllerGrounded() {
 
@@ -491,23 +430,23 @@ public class Player : MonoBehaviour {
 
 
 //Different input managment style
-//if (Input.GetKeyDown (PunchKey)) {
+//if (Input.GetKeyDown (AttackKey)) {
 //	if (playerState.currentState == PLAYERSTATE.SPRINTING) {
 //		if (checkStamina (20)) {
-//			doSprintPunch = true;
-//			playerState.SetState (PLAYERSTATE.SPRINTPUNCH);
+//			doSprintAttack = true;
+//			playerState.SetState (PLAYERSTATE.SPRINTATTACK);
 //		}
-//	} else if (playerState.currentState == PLAYERSTATE.PUNCH) {
-//		continuePunch = true;
-//	} else if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
-//		doPunch = true;
+//	} else if (playerState.currentState == PLAYERSTATE.ATTACK) {
+//		continueAttack = true;
+//	} else if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
+//		doAttack = true;
 //
 //	}
 //} else if (Input.GetKeyDown (JumpKey)) {
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE || playerState.currentState == PLAYERSTATE.SPRINTING) {
-//		action.verticalVelocity = 10;
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE || playerState.currentState == PLAYERSTATE.SPRINTING) {
+//		action.Velocity = 10;
 //		action.moveVector.x = inputDirection_x;
-//		action.moveVector.z = inputDirection_z;
+//		action.moveVector.z = inputDirectioverticaln_z;
 //		anim.Jump ();
 //		playerState.SetState (PLAYERSTATE.JUMPING);
 //	} else if (playerState.currentState == PLAYERSTATE.SPRINTING) { // change later
@@ -517,13 +456,13 @@ public class Player : MonoBehaviour {
 //	}
 //
 //} else if (Input.GetKeyDown (DefendKey)) {
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
 //		anim.StartDefend ();
 //		playerState.SetState (PLAYERSTATE.DEFENDING);
 //	}
 //
 //} else if (Input.GetKeyDown (Left)) {
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
 //		if ((Time.time - leftLastTapTime) < tapSpeed) {
 //			anim.Sprint ();
 //			playerState.SetState (PLAYERSTATE.SPRINTING);
@@ -536,7 +475,7 @@ public class Player : MonoBehaviour {
 //	}
 //
 //} else if (Input.GetKeyDown (Right)) {
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
 //		if ((Time.time - rightLastTapTime) < tapSpeed) {
 //			anim.Sprint ();
 //			playerState.SetState (PLAYERSTATE.SPRINTING);
@@ -548,16 +487,16 @@ public class Player : MonoBehaviour {
 //		}
 //	}
 //} else if (inputDirection_x == 0 && inputDirection_z == 0) {
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
-//		if (playerState.currentState != PLAYERSTATE.PUNCH && playerState.currentState != PLAYERSTATE.SPRINTING) {
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
+//		if (playerState.currentState != PLAYERSTATE.ATTACK && playerState.currentState != PLAYERSTATE.SPRINTING) {
 //			anim.Idle ();
 //			playerState.SetState (PLAYERSTATE.IDLE);
 //		}
 //	}
-//} else { //MOVING or SPRINTING
-//	if (playerState.currentState == PLAYERSTATE.MOVING || playerState.currentState == PLAYERSTATE.IDLE) {
+//} else { //WALKING or SPRINTING
+//	if (playerState.currentState == PLAYERSTATE.WALKING || playerState.currentState == PLAYERSTATE.IDLE) {
 //		anim.Walk ();
-//		playerState.SetState (PLAYERSTATE.MOVING);
+//		playerState.SetState (PLAYERSTATE.WALKING);
 //		action.moveVector.x = inputDirection_x;
 //		action.moveVector.z = inputDirection_z;
 //	} else if (playerState.currentState == PLAYERSTATE.SPRINTING) {

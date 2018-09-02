@@ -19,8 +19,8 @@ public class PlayerAnimator : MonoBehaviour {
 
 	public void Walk() {
 		animator.SetBool("Walk", true);
-		animator.ResetTrigger("Punch1");
-		animator.ResetTrigger("Punch2");
+		animator.ResetTrigger("Attack1");
+		animator.ResetTrigger("Attack2");
 	}
 
 	public void Sprint() {
@@ -28,11 +28,11 @@ public class PlayerAnimator : MonoBehaviour {
 		animator.ResetTrigger("Idle");
 	}
 
-	public void Punch(int id) {
+	public void Attack(int id) {
 		animator.SetBool("Walk", false);
-		animator.SetTrigger ("Punch" + id);
+		animator.SetTrigger ("Attack" + id);
 		animator.ResetTrigger("Idle");
-		StartCoroutine (WaitForAnimationFinish ("PlayerPunch" + id));
+		StartCoroutine (WaitForAnimationFinish ("PlayerAttack" + id));
 	}
 
 	public void Stagger() {
@@ -42,11 +42,11 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerStagger"));
 	}
 
-	public void JumpKick() {
-		animator.SetTrigger ("JumpKick");
+	public void JumpAttack() {
+		animator.SetTrigger ("JumpAttack");
 	}
 
-	public void SprintPunch() {
+	public void SprintAttack() {
 		animator.SetTrigger ("SprintAttack");
 		StartCoroutine (WaitForAnimationFinish ("PlayerSprintAttack"));
 	}
@@ -62,7 +62,7 @@ public class PlayerAnimator : MonoBehaviour {
 	}
 
 	public void Jump() {
-		animator.ResetTrigger("JumpKick");
+		animator.ResetTrigger("JumpAttack");
 		animator.SetBool("Walk", false);
 		animator.SetTrigger ("Jump");
 		animator.ResetTrigger("Idle");
@@ -77,7 +77,7 @@ public class PlayerAnimator : MonoBehaviour {
 	public void ShengLongBa() {
 		animator.SetTrigger ("ShengLongBa");
 		animator.ResetTrigger("Idle");
-		animator.ResetTrigger("JumpKick");
+		animator.ResetTrigger("JumpAttack");
 	}
 
 	public void KnockBack() {
