@@ -30,7 +30,7 @@ public class Action : MonoBehaviour {
 	private int DefenseResetTime = 1; 
 	private float LastDefenseTime = 0;
 
-
+    public GameObject attackHitBox;
 	public float verticalVelocity;
 
 	// Use this for initialization
@@ -226,10 +226,10 @@ public class Action : MonoBehaviour {
 		}
 
 		//parry //need to add math for different types of attack
-		if (playerState.currentState == PLAYERSTATE.ATTACK) {
-            anim.ShowParryEffect();
-			wasHit = false;
-		}
+		//if (playerState.currentState == PLAYERSTATE.ATTACK) {
+  //          anim.ShowParryEffect();
+		//	wasHit = false;
+		//}
 
 		//probably not necessary
 //		if (playerState.currentState == PLAYERSTATE.STAGGER && d.attackType != AttackType.Stagger) {
@@ -350,8 +350,7 @@ public class Action : MonoBehaviour {
                    (playerState.currentState == PLAYERSTATE.SPRINTATTACK && animName == "PlayerSprintAttack")) {
 			anim.Idle ();
 			playerState.SetState (PLAYERSTATE.IDLE);
-		} 
-
+		}
 
 
 	
@@ -388,8 +387,8 @@ public class Action : MonoBehaviour {
 
 		float moveTime = 0.5f;
 
-		StartCoroutine (WaitBeforeRaycast (d, dir));
-
+        StartCoroutine (WaitBeforeRaycast (d, dir));
+        //StartCoroutine(WaitBeforeCollide(d, dir));
 	}
 
 	//returns true is the player is facing the enemy
@@ -447,7 +446,7 @@ public class Action : MonoBehaviour {
 			if (layermask == npcLayerMask || layermask == playerLayerMask) {
 				GameObject enemy = hits [i].collider.gameObject;
 
-				if (enemy.GetComponent<CharacterController>() != controller && !(enemy.GetComponent<PlayerState>().currentState == PLAYERSTATE.KNOCKBACK && enemy.GetComponent<CharacterController>().isGrounded)) {
+				if (enemy.GetComponent<CharacterController>() != controller ) {
 
 					enemy.GetComponent<Action>().getHit(d);
 					targetHit = true;
@@ -456,12 +455,82 @@ public class Action : MonoBehaviour {
 			}
 		}
 
-		//we havent hit anything
-		if(hits.Length == 0){ 
-			targetHit = false;
-		}
 	}
 
+    IEnumerator WaitBeforeCollide(DamageObject d, int dir)
+    {
 
+        LayerMask npcLayerMask = LayerMask.NameToLayer("NPC");
+        LayerMask playerLayerMask = LayerMask.NameToLayer("Player");
+        LayerMask attackLayerMask = LayerMask.NameToLayer("Attack");
+        bool parried = false;
+        Collider col = attackHitBox.GetComponent<BoxCollider>();
+        col.enabled = true;
+        attackHitBox.SetActive(true);
+
+        yield return new WaitForSeconds(d.lag);
+
+        //      Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+
+        Vector3 originalScale = attackHitBox.transform.localScale;
+        Vector3 scaleFactor = new Vector3(d.range, 1f, 1f);
+        attackHitBox.transform.localScale = Vector3.Scale(originalScale,scaleFactor);
+
+
+        Collider[] cols = Physics.OverlapBox(col.bounds.center, col.bounds.extents, col.transform.rotation);
+
+        //we have hit something
+
+        print(cols.Length);
+
+        foreach (Collider c in cols)
+        {
+            GameObject target = c.gameObject;
+            print(target.name);
+
+            if (target.GetComponent<CharacterController>() == controller || target.transform == attackHitBox.transform)
+            {
+                continue;
+            }
+            LayerMask layermask = target.layer;
+            //we have hit an enemy
+            if (layermask == attackLayerMask)
+            {
+                print("true");
+                parried = true;
+                anim.ShowParryEffect();
+            }
+
+        }
+
+        if (!parried) {
+            foreach (Collider c in cols)
+            {
+                GameObject target = c.gameObject;
+
+                if (target.GetComponent<CharacterController>() == controller)
+                {
+                    continue;
+                }
+
+                LayerMask layermask = c.gameObject.layer;
+                //we have hit an enemy
+                if (layermask == npcLayerMask || layermask == playerLayerMask)
+                {
+
+                    target.GetComponent<Action>().getHit(d);
+                    targetHit = true;
+
+                }
+
+            }
+        }
+        attackHitBox.transform.localScale = originalScale;
+        yield return new WaitForSeconds(d.lag);
+        attackHitBox.GetComponent<BoxCollider>().enabled = false;
+        attackHitBox.SetActive(false);
+
+
+    }
 
 }

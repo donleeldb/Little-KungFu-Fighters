@@ -1,0 +1,1 @@
+Traditional fighting games have 2 types of actions, offense and defense; 2 types of state, hitting or getting hit. In the Wushu world, offense is the best defense
