@@ -31,6 +31,7 @@ public class Action : MonoBehaviour {
 	private float LastDefenseTime = 0;
 
     public GameObject attackHitBox;
+    public GameObject specialHitBox;
 	public float verticalVelocity;
 
 	// Use this for initialization
@@ -130,18 +131,21 @@ public class Action : MonoBehaviour {
 	}
 
 	public void ShengLongBa(int dir) {
-        verticalVelocity = 10;
+        verticalVelocity = 12;
         moveVector.x = dir * 2;
-        playerState.SetState(PLAYERSTATE.JUMPING);
+        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
+
+        specialHitBox.GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(specialHitBox.GetComponent<BoxCollider>(), 0.5f));
 
 		anim.ShengLongBa ();
-		DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
-		d1.attackType = AttackType.KnockDown;
-		d1.lag = 0f;
-		CheckForHit (d1);
-		DamageObject d2 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 0.5f);
-		d2.lag = 0.1f;
-		CheckForHit (d2);
+		//DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
+		//d1.attackType = AttackType.KnockDown;
+		//d1.lag = 0f;
+		//CheckForHit (d1);
+		//DamageObject d2 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 0.5f);
+		//d2.lag = 0.1f;
+		//CheckForHit (d2);
 	}
 
     public void SprintLeft(float speed, int dir, float inputDirection_x, float inputDirection_z)
@@ -269,7 +273,7 @@ public class Action : MonoBehaviour {
 
 				if (d.verticalForce != 0f) {
 //					anim.AddVerticalForce (d.verticalForce, facingRight);
-					verticalVelocity = 10f;
+					verticalVelocity = 14f;
 				}
 
 			} else {
@@ -387,8 +391,8 @@ public class Action : MonoBehaviour {
 
 		float moveTime = 0.5f;
 
-        StartCoroutine (WaitBeforeRaycast (d, dir));
-        //StartCoroutine(WaitBeforeCollide(d, dir));
+        //StartCoroutine (WaitBeforeRaycast (d, dir));
+        StartCoroutine(WaitBeforeCollide(d, dir));
 	}
 
 	//returns true is the player is facing the enemy
@@ -456,6 +460,14 @@ public class Action : MonoBehaviour {
 		}
 
 	}
+
+    IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl) 
+    {
+        print("start count down");
+        yield return new WaitForSeconds(ttl);
+        print("end count down");
+        collider.enabled = false;
+    }
 
     IEnumerator WaitBeforeCollide(DamageObject d, int dir)
     {
