@@ -32,6 +32,7 @@ public class Action : MonoBehaviour {
 
     public GameObject attackHitBox;
     public GameObject specialHitBox;
+    public GameObject specialHitBox1;
 	public float verticalVelocity;
 
 	// Use this for initialization
@@ -148,6 +149,20 @@ public class Action : MonoBehaviour {
 		//CheckForHit (d2);
 	}
 
+    public void HuXiangBa(int dir)
+    {
+        anim.HuXiangBa();
+
+        verticalVelocity = 6;
+        moveVector.x = dir * 20;
+        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
+
+   
+        specialHitBox1.GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(specialHitBox1.GetComponent<BoxCollider>(), 0.7f));
+
+    }
+
     public void SprintLeft(float speed, int dir, float inputDirection_x, float inputDirection_z)
     {
         anim.Sprint();
@@ -251,7 +266,7 @@ public class Action : MonoBehaviour {
 			
 
 		//start knockDown sequence
-		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKBACK && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
+		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
 			anim.ShowHitEffect ();
 
@@ -270,10 +285,9 @@ public class Action : MonoBehaviour {
 					verticalVelocity = 5f;
 					anim.AddForce(d.force*20, facingRight);
 				}
-
 				if (d.verticalForce != 0f) {
 //					anim.AddVerticalForce (d.verticalForce, facingRight);
-					verticalVelocity = 14f;
+                    verticalVelocity = d.verticalForce;
 				}
 
 			} else {
@@ -460,6 +474,12 @@ public class Action : MonoBehaviour {
 		}
 
 	}
+
+    IEnumerator waitBeforeChangeOfSpeed(float ttl)
+    {
+        yield return new WaitForSeconds(ttl);
+
+    }
 
     IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl) 
     {

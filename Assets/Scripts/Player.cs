@@ -7,7 +7,7 @@ public class Player : MonoBehaviour {
 	private float inputDirection_x;
 	private float inputDirection_z;
 
-	private float gravity = 0.50f;
+	private float gravity = 0.75f;
 	private float speed = 5.0f;
 
 	public float tapSpeed = 1f; //in seconds. seems weird tho. 1s should be very long. but still doesn't register sometimes, could be editor problems
@@ -123,7 +123,22 @@ public class Player : MonoBehaviour {
 							
 							action.ShengLongBa (dir);
 						}
-					} else if (Input.GetKeyDown (Up)) {
+                    } else if (Input.GetKey(AttackKey) && Input.GetKeyDown(Down))
+                    {
+                        if (checkStamina(10))
+                        {
+                            action.HuXiangBa(dir);
+                        }
+                    }
+                    else if (Input.GetKey(Down) && Input.GetKeyDown(AttackKey))
+                    {
+                        if (checkStamina(10))
+                        {
+
+                            action.HuXiangBa(dir);
+                        }
+                    }
+                    else if (Input.GetKeyDown (Up)) {
 
 						if ((Time.time - upLastTapTime) < tapSpeed) {
                             action.DoSideStep(speed, inputDirection_z);
@@ -305,6 +320,21 @@ public class Player : MonoBehaviour {
             if (checkStamina(10))
             {
                 action.ShengLongBa(dir);
+            }
+            return true;
+        } else if (Input.GetKey(AttackKey) && Input.GetKeyDown(Down))
+        {
+            if (checkStamina(10))
+            {
+                action.HuXiangBa(dir);
+            }
+            return true;
+        }
+        else if (Input.GetKey(Down) && Input.GetKeyDown(AttackKey))
+        {
+            if (checkStamina(10))
+            {
+                action.HuXiangBa(dir);
             }
             return true;
         } else if (Input.GetKey (Up) && Input.GetKeyDown(DefendKey)) {

@@ -80,6 +80,13 @@ public class PlayerAnimator : MonoBehaviour {
 		animator.ResetTrigger("JumpAttack");
 	}
 
+    public void HuXiangBa()
+    {
+        animator.SetTrigger("HuXiangBa");
+        animator.ResetTrigger("Idle");
+        animator.ResetTrigger("JumpAttack");
+    }
+
 	public void KnockBack() {
 		animator.SetTrigger ("KnockBack");
 		animator.ResetTrigger("Idle");
