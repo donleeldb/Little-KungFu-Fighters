@@ -31,6 +31,8 @@ public class Action : MonoBehaviour {
 	private float LastDefenseTime = 0;
 
     public GameObject attackHitBox;
+    public GameObject specialHitBox;
+    public GameObject specialHitBox1;
 	public float verticalVelocity;
 
 	// Use this for initialization
@@ -130,19 +132,29 @@ public class Action : MonoBehaviour {
 	}
 
 	public void ShengLongBa(int dir) {
-        verticalVelocity = 10;
+        verticalVelocity = 12;
         moveVector.x = dir * 2;
-        playerState.SetState(PLAYERSTATE.JUMPING);
+        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
+
+        specialHitBox.GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(specialHitBox.GetComponent<BoxCollider>(), 0.5f));
 
 		anim.ShengLongBa ();
-		DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
-		d1.attackType = AttackType.KnockDown;
-		d1.lag = 0f;
-		CheckForHit (d1);
-		DamageObject d2 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 0.5f);
-		d2.lag = 0.1f;
-		CheckForHit (d2);
 	}
+
+    public void HuXiangBa(int dir)
+    {
+        anim.HuXiangBa();
+
+        verticalVelocity = 6;
+        moveVector.x = dir * 20;
+        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
+
+   
+        specialHitBox1.GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(specialHitBox1.GetComponent<BoxCollider>(), 0.7f));
+
+    }
 
     public void SprintLeft(float speed, int dir, float inputDirection_x, float inputDirection_z)
     {
@@ -162,7 +174,7 @@ public class Action : MonoBehaviour {
         moveVector.z = inputDirection_z;
     }
 		
-	public void getHit(DamageObject d) {
+	public void getHit(DamageObject d, int fixedDir = 0) {
 
 		bool wasHit = true;
 
@@ -181,7 +193,7 @@ public class Action : MonoBehaviour {
 			wasHit = false;
 			UpdateDefenseCounter ();
 
-			if (d.attackType == AttackType.Stagger) {
+            if (d.attackType == AttackType.Stagger || d.attackType == AttackType.KnockDown) {
 				wasHit = true;
 				anim.Staggered ();
 				playerState.SetState (PLAYERSTATE.STAGGERED);
@@ -247,7 +259,7 @@ public class Action : MonoBehaviour {
 			
 
 		//start knockDown sequence
-		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKBACK && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
+		if (wasHit && playerState.currentState != PLAYERSTATE.KNOCKDOWN) {
 //			GetComponent<HealthSystem> ().SubstractHealth (d.damage);
 			anim.ShowHitEffect ();
 
@@ -259,17 +271,19 @@ public class Action : MonoBehaviour {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);
 				KnockBack (d.inflictor);
 
-				if(isFacingTarget(d.inflictor)){ 
+                if (fixedDir != 0) {
+                    verticalVelocity = 5f;
+                    anim.AddForce(fixedDir *d.force * 20, facingRight);
+                } else if (isFacingTarget(d.inflictor)){ 
 					verticalVelocity = 5f;
 					anim.AddForce(-d.force*20, facingRight);
 				} else {
 					verticalVelocity = 5f;
 					anim.AddForce(d.force*20, facingRight);
 				}
-
 				if (d.verticalForce != 0f) {
 //					anim.AddVerticalForce (d.verticalForce, facingRight);
-					verticalVelocity = 10f;
+                    verticalVelocity = d.verticalForce;
 				}
 
 			} else {
@@ -387,8 +401,8 @@ public class Action : MonoBehaviour {
 
 		float moveTime = 0.5f;
 
-        StartCoroutine (WaitBeforeRaycast (d, dir));
-        //StartCoroutine(WaitBeforeCollide(d, dir));
+        //StartCoroutine (WaitBeforeRaycast (d, dir));
+        StartCoroutine(WaitBeforeCollide(d, dir));
 	}
 
 	//returns true is the player is facing the enemy
@@ -456,6 +470,20 @@ public class Action : MonoBehaviour {
 		}
 
 	}
+
+    IEnumerator waitBeforeChangeOfSpeed(float ttl)
+    {
+        yield return new WaitForSeconds(ttl);
+
+    }
+
+    IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl) 
+    {
+        print("start count down");
+        yield return new WaitForSeconds(ttl);
+        print("end count down");
+        collider.enabled = false;
+    }
 
     IEnumerator WaitBeforeCollide(DamageObject d, int dir)
     {

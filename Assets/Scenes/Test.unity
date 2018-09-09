@@ -177,14 +177,16 @@ Prefab:
       propertyPath: staminaBar
       value: 
       objectReference: {fileID: 333024113}
-    - target: {fileID: 65924858704835146, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 0
+    - target: {fileID: 1674398270501672, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 65924858704835146, guid: 182245ae3e3c14b808a2716c779ea4ad,
-        type: 2}
-      propertyPath: m_IsTrigger
+    - target: {fileID: 1197419673368266, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1451146303933892, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -447,7 +449,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1674398270501672, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
       propertyPath: m_Name
-      value: AttackHitBox1
+      value: AttackHitBox
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 182245ae3e3c14b808a2716c779ea4ad, type: 2}
