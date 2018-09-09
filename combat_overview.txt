@@ -49,4 +49,6 @@ Attributes：
 轻功：movement speed
 
 
-
+Attributes: 
+内力：health + mana
+出招与被击中都会消耗内力。当内力低于10%时、角色处于
