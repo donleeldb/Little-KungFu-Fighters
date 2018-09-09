@@ -140,13 +140,6 @@ public class Action : MonoBehaviour {
         StartCoroutine(ColliderTimeToLive(specialHitBox.GetComponent<BoxCollider>(), 0.5f));
 
 		anim.ShengLongBa ();
-		//DamageObject d1 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 3f);
-		//d1.attackType = AttackType.KnockDown;
-		//d1.lag = 0f;
-		//CheckForHit (d1);
-		//DamageObject d2 = new DamageObject (20, this.gameObject, 1f, Vector3.down, 0.01f, 0.5f);
-		//d2.lag = 0.1f;
-		//CheckForHit (d2);
 	}
 
     public void HuXiangBa(int dir)
@@ -181,7 +174,7 @@ public class Action : MonoBehaviour {
         moveVector.z = inputDirection_z;
     }
 		
-	public void getHit(DamageObject d) {
+	public void getHit(DamageObject d, int fixedDir = 0) {
 
 		bool wasHit = true;
 
@@ -200,7 +193,7 @@ public class Action : MonoBehaviour {
 			wasHit = false;
 			UpdateDefenseCounter ();
 
-			if (d.attackType == AttackType.Stagger) {
+            if (d.attackType == AttackType.Stagger || d.attackType == AttackType.KnockDown) {
 				wasHit = true;
 				anim.Staggered ();
 				playerState.SetState (PLAYERSTATE.STAGGERED);
@@ -278,7 +271,10 @@ public class Action : MonoBehaviour {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);
 				KnockBack (d.inflictor);
 
-				if(isFacingTarget(d.inflictor)){ 
+                if (fixedDir != 0) {
+                    verticalVelocity = 5f;
+                    anim.AddForce(fixedDir *d.force * 20, facingRight);
+                } else if (isFacingTarget(d.inflictor)){ 
 					verticalVelocity = 5f;
 					anim.AddForce(-d.force*20, facingRight);
 				} else {
