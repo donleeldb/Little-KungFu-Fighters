@@ -103,7 +103,7 @@ public class PlayerAnimator : MonoBehaviour {
     {
         animator.SetTrigger("Paralyzed");
         animator.ResetTrigger("Idle");
-        StartCoroutine(WaitForAnimationFinish("Paralyzed"));
+        StartCoroutine(WaitForAnimationFinish("PlayerParalyzed"));
     }
 
 	public void Staggered() {

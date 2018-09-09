@@ -281,7 +281,6 @@ public class Action : MonoBehaviour {
 			moveVector.x = 0;
 			moveVector.z = 0;
 			verticalVelocity = 0;
-            verticalVelocity = 5f;
 
             if (d.attackType == AttackType.Paralyze)
             {
@@ -292,7 +291,9 @@ public class Action : MonoBehaviour {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);
 				KnockBack (d.inflictor);
 
-                verticalVelocity = d.verticalForce;
+                verticalVelocity = 5f;
+                if (d.verticalForce != 0f)
+                    verticalVelocity = d.verticalForce;
                 print(verticalVelocity);
 
     //            if (fixedDir != 0) {
