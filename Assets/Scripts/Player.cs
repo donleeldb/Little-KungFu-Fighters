@@ -24,6 +24,7 @@ public class Player : MonoBehaviour {
 	private bool doJumpAttack = false;
 	private bool doSprintAttack = false;
 	private bool doStagger = false;
+    private bool doParalyze = false;
 
 	private Vector3 lastMotion;
 	private CharacterController controller;
@@ -85,8 +86,8 @@ public class Player : MonoBehaviour {
 			flip = true;
 
 //		if (IsControllerGrounded()) { // mine is bugged
-
-			if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER) {
+            // State determines what you can do. attacktype determines how you might react 
+            if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER || playerState.currentState == PLAYERSTATE.PARALYZED) {
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
 				if (action.verticalVelocity < 1f) {
@@ -227,12 +228,18 @@ public class Player : MonoBehaviour {
 			if (checkStamina (10)) {
 				action.DoStagger ();
 			}
-		}
+        } else if (doParalyze) {
+            if (checkStamina(10))
+            {
+                action.DoParalyze();
+            }
+        }
 		doAttack = false;
 		continueAttack = false;
 		doJumpAttack = false;
 		doSprintAttack = false;
 		doStagger = false;
+        doParalyze = false;
 	}
 
 
@@ -346,6 +353,21 @@ public class Player : MonoBehaviour {
             if (checkStamina(10))
             {
                 doStagger = true;
+            }
+            return true;
+        } else if (Input.GetKey(Down) && Input.GetKeyDown(DefendKey))
+        {
+            if (checkStamina(10))
+            {
+                doParalyze = true;
+            }
+            return true;
+        }
+        else if (Input.GetKey(DefendKey) && Input.GetKeyDown(Down))
+        {
+            if (checkStamina(10))
+            {
+                doParalyze = true;
             }
             return true;
         }

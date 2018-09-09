@@ -39,6 +39,7 @@ public enum AttackType {
 	MediumPunch = 20,
 	KnockDown = 30,
 	Stagger = 10,
+    Paralyze = 10,
 };
 
 

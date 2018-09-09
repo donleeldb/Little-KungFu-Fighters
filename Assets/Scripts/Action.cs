@@ -86,6 +86,15 @@ public class Action : MonoBehaviour {
 		CheckForHit (d);
 	}
 
+    public void DoParalyze()
+    {
+        playerState.SetState(PLAYERSTATE.STAGGER);
+        anim.Stagger();
+        DamageObject d = new DamageObject(20, this.gameObject, 0.5f, Vector3.zero, 0.005f);
+        d.attackType = AttackType.Paralyze;
+        CheckForHit(d);
+    }
+
 	public void DoJumpAttack() {
 		playerState.SetState (PLAYERSTATE.JUMPATTACK);
 		anim.JumpAttack ();
@@ -121,8 +130,6 @@ public class Action : MonoBehaviour {
         playerState.SetState(PLAYERSTATE.JUMPING);
     }
 
-
-
 	public void DoSprintAttack() {
 		playerState.SetState (PLAYERSTATE.SPRINTATTACK);
 		anim.SprintAttack ();
@@ -130,6 +137,8 @@ public class Action : MonoBehaviour {
 		d.attackType = AttackType.KnockDown;
 		CheckForHit (d);
 	}
+
+
 
 	public void ShengLongBa(int dir) {
         verticalVelocity = 12;
@@ -198,11 +207,13 @@ public class Action : MonoBehaviour {
 				anim.Staggered ();
 				playerState.SetState (PLAYERSTATE.STAGGERED);
                 anim.ShowStaggerEffect();
-				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-0.005f, facingRight);
-				} else {
-					anim.AddForce(0.005f, facingRight);
-				}
+				//if(isFacingTarget(d.inflictor)){ 
+				//	anim.AddForce(0.005f, true);
+				//} else {
+				//	anim.AddForce(0.005f, false);
+				//}
+
+                anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
 				DefenseCount = 0;
 				return;
 
@@ -210,14 +221,16 @@ public class Action : MonoBehaviour {
                 anim.Staggered();
                 playerState.SetState(PLAYERSTATE.STAGGERED);
                 anim.ShowStaggerEffect();
-                if (isFacingTarget(d.inflictor))
-                {
-                    anim.AddForce(-0.005f, facingRight);
-                }
-                else
-                {
-                    anim.AddForce(0.005f, facingRight);
-                }
+                //if (isFacingTarget(d.inflictor))
+                //{
+                //    anim.AddForce(0.005f, true);
+                //}
+                //else
+                //{
+                //    anim.AddForce(0.005f, false);
+                //}
+                anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
+
                 DefenseCount = 0;
                 return;
 			} else {
@@ -227,11 +240,13 @@ public class Action : MonoBehaviour {
 ////				anim.ShowDefendEffect();
 //
 				anim.ShowDefendEffect();
-				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-0.005f, facingRight);
-				} else {
-					anim.AddForce(0.005f, facingRight);
-				}
+				//if(isFacingTarget(d.inflictor)){ 
+				//	anim.AddForce(0.005f, true);
+				//} else {
+				//	anim.AddForce(0.005f, false);
+				//}
+                anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
+
 //			}
 			}
 
@@ -266,34 +281,39 @@ public class Action : MonoBehaviour {
 			moveVector.x = 0;
 			moveVector.z = 0;
 			verticalVelocity = 0;
+            verticalVelocity = 5f;
 
-			if (d.attackType == AttackType.KnockDown) {
+            if (d.attackType == AttackType.Paralyze)
+            {
+                playerState.SetState(PLAYERSTATE.PARALYZED);
+                anim.Paralyzed();
+
+            } else if (d.attackType == AttackType.KnockDown) {
 				playerState.SetState (PLAYERSTATE.KNOCKBACK);
 				KnockBack (d.inflictor);
 
-                if (fixedDir != 0) {
-                    verticalVelocity = 5f;
-                    anim.AddForce(fixedDir *d.force * 20, facingRight);
-                } else if (isFacingTarget(d.inflictor)){ 
-					verticalVelocity = 5f;
-					anim.AddForce(-d.force*20, facingRight);
-				} else {
-					verticalVelocity = 5f;
-					anim.AddForce(d.force*20, facingRight);
-				}
-				if (d.verticalForce != 0f) {
-//					anim.AddVerticalForce (d.verticalForce, facingRight);
-                    verticalVelocity = d.verticalForce;
-				}
+                verticalVelocity = d.verticalForce;
+                print(verticalVelocity);
+
+    //            if (fixedDir != 0) {
+    //                anim.AddForce(fixedDir *d.force * 20, facingRight);
+    //            } else if (isFacingTarget(d.inflictor)){ 
+				//	anim.AddForce(d.force*20, true);
+				//} else {
+				//	anim.AddForce(d.force*20, false);
+				//}
+
+                anim.AddForce(d.force * 20, d.inflictor.GetComponent<Action>().facingRight);
 
 			} else {
 				playerState.SetState (PLAYERSTATE.HIT);
 				anim.Hit ();
-				if(isFacingTarget(d.inflictor)){ 
-					anim.AddForce(-d.force, facingRight);
-				} else {
-					anim.AddForce(d.force, facingRight);
-				}
+				//if(isFacingTarget(d.inflictor)){ 
+				//	anim.AddForce(-d.force, facingRight);
+				//} else {
+				//	anim.AddForce(d.force, facingRight);
+				//}
+                anim.AddForce(d.force, d.inflictor.GetComponent<Action>().facingRight);
 			}
 		}
 	}
@@ -337,8 +357,8 @@ public class Action : MonoBehaviour {
 
 	public void Ready(string animName) {
 
-		if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
-			if (animName == "PlayerKnockDown") {
+        if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.KNOCKBACK || playerState.currentState == PLAYERSTATE.PARALYZED) {
+			if (animName == "PlayerKnockDown" || animName == "PlayerParalyzed") {
 //				controller.enabled = true;
 				anim.Idle ();
 				playerState.SetState (PLAYERSTATE.IDLE);
@@ -479,9 +499,7 @@ public class Action : MonoBehaviour {
 
     IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl) 
     {
-        print("start count down");
         yield return new WaitForSeconds(ttl);
-        print("end count down");
         collider.enabled = false;
     }
 
@@ -509,12 +527,10 @@ public class Action : MonoBehaviour {
 
         //we have hit something
 
-        print(cols.Length);
 
         foreach (Collider c in cols)
         {
             GameObject target = c.gameObject;
-            print(target.name);
 
             if (target.GetComponent<CharacterController>() == controller || target.transform == attackHitBox.transform)
             {
@@ -524,7 +540,6 @@ public class Action : MonoBehaviour {
             //we have hit an enemy
             if (layermask == attackLayerMask)
             {
-                print("true");
                 parried = true;
                 anim.ShowParryEffect();
             }

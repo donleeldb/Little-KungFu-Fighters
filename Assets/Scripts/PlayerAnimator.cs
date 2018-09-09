@@ -99,6 +99,13 @@ public class PlayerAnimator : MonoBehaviour {
 		StartCoroutine (WaitForAnimationFinish ("PlayerKnockDown"));
 	}
 
+    public void Paralyzed()
+    {
+        animator.SetTrigger("Paralyzed");
+        animator.ResetTrigger("Idle");
+        StartCoroutine(WaitForAnimationFinish("Paralyzed"));
+    }
+
 	public void Staggered() {
 		animator.ResetTrigger ("Idle");
 
