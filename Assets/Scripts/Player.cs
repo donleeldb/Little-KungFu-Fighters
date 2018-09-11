@@ -66,7 +66,10 @@ public class Player : MonoBehaviour {
 
 		stamina.AddStamina (0.1f);
 
-		action.moveVector = Vector3.zero;
+        //waitforchangeofspeed might have changed it b4 update
+        if (playerState.currentState != PLAYERSTATE.NOTIDLE && playerState.currentState != PLAYERSTATE.SHENGLONGBA) {
+            action.moveVector = Vector3.zero;
+        }
 
 		inputDirection_x = Input.GetAxis (horizontal) * speed;
 		inputDirection_z = Input.GetAxis (depth) * speed;
@@ -87,7 +90,12 @@ public class Player : MonoBehaviour {
 
 //		if (IsControllerGrounded()) { // mine is bugged
             // State determines what you can do. attacktype determines how you might react 
-            if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.STAGGERED || playerState.currentState == PLAYERSTATE.STAGGER || playerState.currentState == PLAYERSTATE.PARALYZED) {
+            if (playerState.currentState == PLAYERSTATE.KNOCKDOWN || 
+                playerState.currentState == PLAYERSTATE.HIT || 
+                playerState.currentState == PLAYERSTATE.STAGGERED || 
+                playerState.currentState == PLAYERSTATE.STAGGER || 
+                playerState.currentState == PLAYERSTATE.PARALYZED ||
+                playerState.currentState == PLAYERSTATE.NOTIDLE ) { //dont want them to turn back to idle
 				
 			} else if (playerState.currentState == PLAYERSTATE.KNOCKBACK){
 				if (action.verticalVelocity < 1f) {
@@ -179,7 +187,11 @@ public class Player : MonoBehaviour {
 
 
 			if (playerState.currentState == PLAYERSTATE.HIT || playerState.currentState == PLAYERSTATE.KNOCKBACK) {
-			} else {
+            } else if (playerState.currentState == PLAYERSTATE.NOTIDLE) {
+                playerState.SetState(PLAYERSTATE.SHENGLONGBA);
+   
+            }
+            else {
 				
                 action.moveVector.x = lastMotion.x;
 				action.moveVector.z = lastMotion.z;

@@ -154,14 +154,8 @@ public class Action : MonoBehaviour {
     public void HuXiangBa(int dir)
     {
         anim.HuXiangBa();
-
-        verticalVelocity = 6;
-        moveVector.x = dir * 20;
-        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
-
-   
-        specialHitBox1.GetComponent<BoxCollider>().enabled = true;
-        StartCoroutine(ColliderTimeToLive(specialHitBox1.GetComponent<BoxCollider>(), 0.7f));
+        playerState.SetState(PLAYERSTATE.NOTIDLE);
+        StartCoroutine(waitBeforeChangeOfSpeed(0.3f, dir));
 
     }
 
@@ -492,9 +486,13 @@ public class Action : MonoBehaviour {
 
 	}
 
-    IEnumerator waitBeforeChangeOfSpeed(float ttl)
+    IEnumerator waitBeforeChangeOfSpeed(float ttl, int dir)
     {
         yield return new WaitForSeconds(ttl);
+        verticalVelocity = 8;
+        moveVector.x = dir * 20;
+        specialHitBox1.GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(specialHitBox1.GetComponent<BoxCollider>(), 1f));
 
     }
 
