@@ -62,7 +62,7 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		print (playerState.currentState);
+		//print (playerState.currentState);
 
 		stamina.AddStamina (0.1f);
 
@@ -123,53 +123,11 @@ public class Player : MonoBehaviour {
 					
 			} else if (playerState.currentState == PLAYERSTATE.ATTACK) { // when attacking, can't do anything else except for keep attacking
 				if (Input.GetKey (式Key)) {
-					if (Input.GetKey (AttackKey) && Input.GetKeyDown (Up)) {
-						if (checkStamina (10)) {
-							action.ShengLongBa (dir);
-						}
-					} else if (Input.GetKey (Up) && Input.GetKeyDown (AttackKey)) {
-						if (checkStamina (10)) {
-							
-							action.ShengLongBa (dir);
-						}
-                    } else if (Input.GetKey(AttackKey) && Input.GetKeyDown(Down))
-                    {
-                        if (checkStamina(10))
-                        {
-                            action.HuXiangBa(dir);
-                        }
-                    }
-                    else if (Input.GetKey(Down) && Input.GetKeyDown(AttackKey))
-                    {
-                        if (checkStamina(10))
-                        {
-
-                            action.HuXiangBa(dir);
-                        }
-                    }
-                    else if (Input.GetKeyDown (Up)) {
-
-						if ((Time.time - upLastTapTime) < tapSpeed) {
-                            action.DoSideStep(speed, inputDirection_z);
-						} else {
-							upLastTapTime = Time.time;
-						}
-
-					} else if (Input.GetKeyDown (Down)) {
-						if ((Time.time - downLastTapTime) < tapSpeed) {
-                            action.DoSideStep(speed, inputDirection_z);
-						} else {
-							downLastTapTime = Time.time;
-						}
-					} else { 
-						// should probs change to 式 animation
-						anim.Idle ();
-						playerState.SetState (PLAYERSTATE.IDLE);
-
-					}
+                    listenForAttackComboInput(dir);
 				} else if (Input.GetKeyDown (AttackKey)) {
 					continueAttack = true;
 				}
+
 			} else if (playerState.currentState == PLAYERSTATE.SPRINTATTACK) {
 				inputDirection_x = dir * speed;
 				action.moveVector.x = inputDirection_x;
@@ -326,7 +284,8 @@ public class Player : MonoBehaviour {
     private bool listenForAttackComboInput(int dir)
     {
 
-        if (Input.GetKey(AttackKey) && Input.GetKeyDown(Up))
+        //if (Input.GetKey(AttackKey) && Input.GetKeyDown(Up))
+        if (Input.GetKey(KeyCode.F))
         {
             if (checkStamina(10))
             {
@@ -341,7 +300,8 @@ public class Player : MonoBehaviour {
                 action.ShengLongBa(dir);
             }
             return true;
-        } else if (Input.GetKey(AttackKey) && Input.GetKeyDown(Down))
+        //} else if (Input.GetKey(AttackKey) && Input.GetKeyDown(Down))
+        } else if (Input.GetKey(KeyCode.G))
         {
             if (checkStamina(10))
             {
@@ -392,8 +352,7 @@ public class Player : MonoBehaviour {
 
         if (Input.GetKey(式Key))
         {
-            if (listenForAttackComboInput(dir)) {
-            } else if (listenForMoveComboInput(dir)) {
+            if (listenForAttackComboInput(dir) || listenForMoveComboInput(dir)) {
             } else {
                 anim.Idle();
                 playerState.SetState(PLAYERSTATE.IDLE);

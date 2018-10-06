@@ -35,6 +35,10 @@ public class Action : MonoBehaviour {
     public GameObject specialHitBox1;
 	public float verticalVelocity;
 
+    LayerMask npcLayerMask;
+    LayerMask playerLayerMask;
+    LayerMask attackLayerMask;
+
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
@@ -43,6 +47,11 @@ public class Action : MonoBehaviour {
 		health = GetComponent<Health> ();
 		stamina = GetComponent<Stamina> ();
 		facingRight = true;
+
+
+        npcLayerMask = LayerMask.NameToLayer("NPC");
+        playerLayerMask = LayerMask.NameToLayer("Player");
+        attackLayerMask = LayerMask.NameToLayer("Attack");
 	}
 
 	public void move(bool flip = true) {
@@ -201,12 +210,6 @@ public class Action : MonoBehaviour {
 				anim.Staggered ();
 				playerState.SetState (PLAYERSTATE.STAGGERED);
                 anim.ShowStaggerEffect();
-				//if(isFacingTarget(d.inflictor)){ 
-				//	anim.AddForce(0.005f, true);
-				//} else {
-				//	anim.AddForce(0.005f, false);
-				//}
-
                 anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
 				DefenseCount = 0;
 				return;
@@ -215,14 +218,6 @@ public class Action : MonoBehaviour {
                 anim.Staggered();
                 playerState.SetState(PLAYERSTATE.STAGGERED);
                 anim.ShowStaggerEffect();
-                //if (isFacingTarget(d.inflictor))
-                //{
-                //    anim.AddForce(0.005f, true);
-                //}
-                //else
-                //{
-                //    anim.AddForce(0.005f, false);
-                //}
                 anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
 
                 DefenseCount = 0;
@@ -234,11 +229,6 @@ public class Action : MonoBehaviour {
 ////				anim.ShowDefendEffect();
 //
 				anim.ShowDefendEffect();
-				//if(isFacingTarget(d.inflictor)){ 
-				//	anim.AddForce(0.005f, true);
-				//} else {
-				//	anim.AddForce(0.005f, false);
-				//}
                 anim.AddForce(0.005f, d.inflictor.GetComponent<Action>().facingRight);
 
 //			}
@@ -251,11 +241,6 @@ public class Action : MonoBehaviour {
   //          anim.ShowParryEffect();
 		//	wasHit = false;
 		//}
-
-		//probably not necessary
-//		if (playerState.currentState == PLAYERSTATE.STAGGER && d.attackType != AttackType.Stagger) {
-//			wasHit = true;
-//		}
 
 		if (wasHit) {
 			UpdateHitCounter ();
@@ -288,26 +273,12 @@ public class Action : MonoBehaviour {
                 verticalVelocity = 5f;
                 if (d.verticalForce != 0f)
                     verticalVelocity = d.verticalForce;
-                print(verticalVelocity);
-
-    //            if (fixedDir != 0) {
-    //                anim.AddForce(fixedDir *d.force * 20, facingRight);
-    //            } else if (isFacingTarget(d.inflictor)){ 
-				//	anim.AddForce(d.force*20, true);
-				//} else {
-				//	anim.AddForce(d.force*20, false);
-				//}
 
                 anim.AddForce(d.force * 20, d.inflictor.GetComponent<Action>().facingRight);
 
 			} else {
 				playerState.SetState (PLAYERSTATE.HIT);
 				anim.Hit ();
-				//if(isFacingTarget(d.inflictor)){ 
-				//	anim.AddForce(-d.force, facingRight);
-				//} else {
-				//	anim.AddForce(d.force, facingRight);
-				//}
                 anim.AddForce(d.force, d.inflictor.GetComponent<Action>().facingRight);
 			}
 		}
@@ -450,41 +421,6 @@ public class Action : MonoBehaviour {
 
 	}
 
-	//on animation finish
-	IEnumerator WaitBeforeRaycast(DamageObject d, int dir) {
-		
-		LayerMask npcLayerMask = LayerMask.NameToLayer ("NPC");
-		LayerMask playerLayerMask = LayerMask.NameToLayer ("Player"); 
-
-		yield return new WaitForSeconds(d.lag);
-
-//		Vector3 playerPos = transform.position + Vector3.up * 1.5f;
-
-		Vector3 rayLength = Vector3.right * dir * d.range; // dictates the attack range
-		Vector3 center = controller.bounds.center + d.centerOffset;
-
-
-		RaycastHit[] hits = Physics.SphereCastAll (center + rayLength * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
-		Debug.DrawRay (center + rayLength * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red,1); // first param is the source, second is length
-
-		//we have hit something
-		for (int i = 0; i < hits.Length; i++) {
-
-			LayerMask layermask = hits [i].collider.gameObject.layer;
-			//we have hit an enemy
-			if (layermask == npcLayerMask || layermask == playerLayerMask) {
-				GameObject enemy = hits [i].collider.gameObject;
-
-				if (enemy.GetComponent<CharacterController>() != controller ) {
-
-					enemy.GetComponent<Action>().getHit(d);
-					targetHit = true;
-				}
-
-			}
-		}
-
-	}
 
     IEnumerator waitBeforeChangeOfSpeed(float ttl, int dir)
     {
@@ -504,10 +440,7 @@ public class Action : MonoBehaviour {
 
     IEnumerator WaitBeforeCollide(DamageObject d, int dir)
     {
-
-        LayerMask npcLayerMask = LayerMask.NameToLayer("NPC");
-        LayerMask playerLayerMask = LayerMask.NameToLayer("Player");
-        LayerMask attackLayerMask = LayerMask.NameToLayer("Attack");
+        
         bool parried = false;
         Collider col = attackHitBox.GetComponent<BoxCollider>();
         col.enabled = true;
@@ -535,13 +468,12 @@ public class Action : MonoBehaviour {
             {
                 continue;
             }
-            LayerMask layermask = target.layer;
-            //we have hit an enemy
-            if (layermask == attackLayerMask)
-            {
+
+            if (Parry(c, attackHitBox.GetComponent<BoxCollider>())) {
                 parried = true;
                 anim.ShowParryEffect();
             }
+
 
         }
 
@@ -572,7 +504,56 @@ public class Action : MonoBehaviour {
         attackHitBox.GetComponent<BoxCollider>().enabled = false;
         attackHitBox.SetActive(false);
 
+    }
+
+    private bool Parry(Collider targetCollider, Collider thisCollider) {
+        GameObject target = targetCollider.gameObject;
+
+        LayerMask layermask = target.layer;
+        //we have hit an enemy
+        return (layermask == attackLayerMask);
 
     }
+
+
+    ////on animation finish
+    //IEnumerator WaitBeforeRaycast(DamageObject d, int dir)
+    //{
+
+    //    LayerMask npcLayerMask = LayerMask.NameToLayer("NPC");
+    //    LayerMask playerLayerMask = LayerMask.NameToLayer("Player");
+
+    //    yield return new WaitForSeconds(d.lag);
+
+    //    //      Vector3 playerPos = transform.position + Vector3.up * 1.5f;
+
+    //    Vector3 rayLength = Vector3.right * dir * d.range; // dictates the attack range
+    //    Vector3 center = controller.bounds.center + d.centerOffset;
+
+
+    //    RaycastHit[] hits = Physics.SphereCastAll(center + rayLength * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
+    //    Debug.DrawRay(center + rayLength * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red, 1); // first param is the source, second is length
+
+    //    //we have hit something
+    //    for (int i = 0; i < hits.Length; i++)
+    //    {
+
+    //        LayerMask layermask = hits[i].collider.gameObject.layer;
+    //        //we have hit an enemy
+    //        if (layermask == npcLayerMask || layermask == playerLayerMask)
+    //        {
+    //            GameObject enemy = hits[i].collider.gameObject;
+
+    //            if (enemy.GetComponent<CharacterController>() != controller)
+    //            {
+
+    //                enemy.GetComponent<Action>().getHit(d);
+    //                targetHit = true;
+    //            }
+
+    //        }
+    //    }
+
+    //}
 
 }
