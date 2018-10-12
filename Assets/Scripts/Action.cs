@@ -388,7 +388,10 @@ public class Action : MonoBehaviour {
 		float moveTime = 0.5f;
 
         //StartCoroutine (WaitBeforeRaycast (d, dir));
-        StartCoroutine(WaitBeforeCollide(d, dir));
+        transform.GetChild(3).gameObject.SetActive(true);
+        //StartCoroutine(GetComponentInChildren<NormalAttack>().WaitBeforeCollide(d, dir));
+        StartCoroutine(transform.GetChild(3).GetComponent<NormalAttack>().WaitBeforeCollide(d, dir));
+
 	}
 
 	//returns true is the player is facing the enemy
