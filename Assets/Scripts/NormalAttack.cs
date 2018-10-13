@@ -9,9 +9,17 @@ public class NormalAttack : Attack {
 	void Start () {
 	}
 
+    public override void Execute(PlayerAnimator anim, int dir)
+    {
+        return;
+    }
 
     public IEnumerator WaitBeforeCollide(DamageObject _d, int dir)
-    {
+    {   npcLayerMask = LayerMask.NameToLayer("NPC");
+        playerLayerMask = LayerMask.NameToLayer("Player");
+        attackLayerMask = LayerMask.NameToLayer("Attack");
+
+
         d = _d;
         bool parried = false;
         BoxCollider col = GetComponent<BoxCollider>();
@@ -31,6 +39,7 @@ public class NormalAttack : Attack {
 
         //we have hit something
 
+        print(cols.Length);
 
         foreach (Collider c in cols)
         {
@@ -49,7 +58,7 @@ public class NormalAttack : Attack {
 
 
         }
-
+        print(parried);
         if (!parried)
         {
             foreach (Collider c in cols)
@@ -65,6 +74,8 @@ public class NormalAttack : Attack {
                 //we have hit an enemy
                 if (layermask == npcLayerMask || layermask == playerLayerMask)
                 {
+                    print("hi");
+
 
                     target.GetComponent<Action>().getHit(d);
 

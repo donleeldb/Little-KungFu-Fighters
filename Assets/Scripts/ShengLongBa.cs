@@ -5,18 +5,37 @@ using UnityEngine;
 public class ShengLongBa : Attack {
 
 
+    public float verticalVelocity;
+    public float moveVectorX;
+    public PLAYERSTATE state;
+
+
 	// Use this for initialization
 	void Start () {
-        anim = transform.parent.GetComponentInChildren<PlayerAnimator>();
         npcLayerMask = LayerMask.NameToLayer("NPC");
         playerLayerMask = LayerMask.NameToLayer("Player");
         attackLayerMask = LayerMask.NameToLayer("Attack");
         d = new DamageObject(20, AttackType.KnockDown, PowerType.Medium, this.gameObject.transform.parent.gameObject, 1f, Vector3.down, 0.005f, 10f);
         d.lag = 0f;
 
+        verticalVelocity = 12;
+        moveVectorX = 2;
+        state = PLAYERSTATE.SHENGLONGBA;
 	}
 
-    private void OnTriggerEnter(Collider other)
+    public override void Execute(PlayerAnimator anim, int dir)
+	{
+
+        transform.parent.GetComponent<Action>().verticalVelocity = verticalVelocity;
+        transform.parent.GetComponent<Action>().moveVector.x = dir * moveVectorX;
+        transform.parent.GetComponent<Action>().playerState.SetState(state);
+
+        GetComponent<BoxCollider>().enabled = true;
+        StartCoroutine(ColliderTimeToLive(GetComponent<BoxCollider>(), 0.5f));
+        anim.ShengLongBa();
+	}
+
+	private void OnTriggerEnter(Collider other)
     {
         int dir = -1;
         if (gameObject.transform.parent.GetComponent<Action>().facingRight)

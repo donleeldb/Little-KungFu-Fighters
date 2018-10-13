@@ -10,7 +10,7 @@ public class Action : MonoBehaviour {
 	private Vector3 lastMotion;
 	private CharacterController controller;
 
-	private PlayerState playerState;
+	public PlayerState playerState;
 	private PlayerAnimator anim;
 	private Health health;
 	private Stamina stamina;
@@ -148,23 +148,26 @@ public class Action : MonoBehaviour {
 	}
 
 
-
 	public void ShengLongBa(int dir) {
-        verticalVelocity = 12;
-        moveVector.x = dir * 2;
-        playerState.SetState(PLAYERSTATE.SHENGLONGBA);
 
-        specialHitBox.GetComponent<BoxCollider>().enabled = true;
-        StartCoroutine(ColliderTimeToLive(specialHitBox.GetComponent<BoxCollider>(), 0.5f));
+        GameObject slb = Instantiate(Resources.Load("Moves/ShengLongBa"), transform.position, Quaternion.identity) as GameObject;
+        slb.transform.parent = transform;
 
-		anim.ShengLongBa ();
+        // need to somehow find attackObject without using the name
+        Attack attackObject = slb.GetComponent<ShengLongBa>();
+
+        attackObject.Execute(anim, dir);
+
 	}
 
     public void HuXiangBa(int dir)
     {
-        anim.HuXiangBa();
-        playerState.SetState(PLAYERSTATE.NOTIDLE);
-        StartCoroutine(waitBeforeChangeOfSpeed(0.3f, dir));
+        GameObject hxb = Instantiate(Resources.Load("Moves/HuXiangBa"), transform.position, Quaternion.identity) as GameObject;
+        hxb.transform.parent = transform;
+
+        Attack attackObject = hxb.GetComponent<HuXiangBa>();
+
+        attackObject.Execute(anim, dir);
 
     }
 
@@ -390,7 +393,7 @@ public class Action : MonoBehaviour {
         //StartCoroutine (WaitBeforeRaycast (d, dir));
         transform.GetChild(3).gameObject.SetActive(true);
         //StartCoroutine(GetComponentInChildren<NormalAttack>().WaitBeforeCollide(d, dir));
-        StartCoroutine(transform.GetChild(3).GetComponent<NormalAttack>().WaitBeforeCollide(d, dir));
+        StartCoroutine(GetComponentInChildren<NormalAttack>().WaitBeforeCollide(d, dir));
 
 	}
 
@@ -424,139 +427,6 @@ public class Action : MonoBehaviour {
 
 	}
 
-
-    IEnumerator waitBeforeChangeOfSpeed(float ttl, int dir)
-    {
-        yield return new WaitForSeconds(ttl);
-        verticalVelocity = 8;
-        moveVector.x = dir * 20;
-        specialHitBox1.GetComponent<BoxCollider>().enabled = true;
-        StartCoroutine(ColliderTimeToLive(specialHitBox1.GetComponent<BoxCollider>(), 1f));
-
-    }
-
-    IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl) 
-    {
-        yield return new WaitForSeconds(ttl);
-        collider.enabled = false;
-    }
-
-    IEnumerator WaitBeforeCollide(DamageObject d, int dir)
-    {
-        
-        bool parried = false;
-        Collider col = attackHitBox.GetComponent<BoxCollider>();
-        col.enabled = true;
-        attackHitBox.SetActive(true);
-
-        yield return new WaitForSeconds(d.lag);
-
-        //      Vector3 playerPos = transform.position + Vector3.up * 1.5f;
-
-        Vector3 originalScale = attackHitBox.transform.localScale;
-        Vector3 scaleFactor = new Vector3(d.range, 1f, 1f);
-        attackHitBox.transform.localScale = Vector3.Scale(originalScale,scaleFactor);
-
-
-        Collider[] cols = Physics.OverlapBox(col.bounds.center, col.bounds.extents, col.transform.rotation);
-
-        //we have hit something
-
-
-        foreach (Collider c in cols)
-        {
-            GameObject target = c.gameObject;
-
-            if (target.GetComponent<CharacterController>() == controller || target.transform == attackHitBox.transform)
-            {
-                continue;
-            }
-
-            if (Parry(c, attackHitBox.GetComponent<BoxCollider>())) {
-                parried = true;
-                anim.ShowParryEffect();
-            }
-
-
-        }
-
-        if (!parried) {
-            foreach (Collider c in cols)
-            {
-                GameObject target = c.gameObject;
-
-                if (target.GetComponent<CharacterController>() == controller)
-                {
-                    continue;
-                }
-
-                LayerMask layermask = c.gameObject.layer;
-                //we have hit an enemy
-                if (layermask == npcLayerMask || layermask == playerLayerMask)
-                {
-
-                    target.GetComponent<Action>().getHit(d);
-                    targetHit = true;
-
-                }
-
-            }
-        }
-        attackHitBox.transform.localScale = originalScale;
-        yield return new WaitForSeconds(d.lag);
-        attackHitBox.GetComponent<BoxCollider>().enabled = false;
-        attackHitBox.SetActive(false);
-
-    }
-
-    private bool Parry(Collider targetCollider, Collider thisCollider) {
-        GameObject target = targetCollider.gameObject;
-
-        LayerMask layermask = target.layer;
-        //we have hit an enemy
-        return (layermask == attackLayerMask);
-
-    }
-
-
-    ////on animation finish
-    //IEnumerator WaitBeforeRaycast(DamageObject d, int dir)
-    //{
-
-    //    LayerMask npcLayerMask = LayerMask.NameToLayer("NPC");
-    //    LayerMask playerLayerMask = LayerMask.NameToLayer("Player");
-
-    //    yield return new WaitForSeconds(d.lag);
-
-    //    //      Vector3 playerPos = transform.position + Vector3.up * 1.5f;
-
-    //    Vector3 rayLength = Vector3.right * dir * d.range; // dictates the attack range
-    //    Vector3 center = controller.bounds.center + d.centerOffset;
-
-
-    //    RaycastHit[] hits = Physics.SphereCastAll(center + rayLength * 0.7f, d.range * 0.3f, Vector3.right * dir, 0, 1 << npcLayerMask | 1 << playerLayerMask);
-    //    Debug.DrawRay(center + rayLength * 0.4f, Vector3.right * dir * d.range * 0.6f, Color.red, 1); // first param is the source, second is length
-
-    //    //we have hit something
-    //    for (int i = 0; i < hits.Length; i++)
-    //    {
-
-    //        LayerMask layermask = hits[i].collider.gameObject.layer;
-    //        //we have hit an enemy
-    //        if (layermask == npcLayerMask || layermask == playerLayerMask)
-    //        {
-    //            GameObject enemy = hits[i].collider.gameObject;
-
-    //            if (enemy.GetComponent<CharacterController>() != controller)
-    //            {
-
-    //                enemy.GetComponent<Action>().getHit(d);
-    //                targetHit = true;
-    //            }
-
-    //        }
-    //    }
-
-    //}
+   
 
 }

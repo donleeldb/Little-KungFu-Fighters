@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Attack : MonoBehaviour {
+public abstract class Attack : MonoBehaviour {
 
     protected PlayerAnimator anim;
     protected LayerMask npcLayerMask;
     protected LayerMask playerLayerMask;
     protected LayerMask attackLayerMask;
     protected DamageObject d;
+
+
 
 	// Use this for initialization
 	void Start () {
@@ -17,6 +19,11 @@ public class Attack : MonoBehaviour {
         playerLayerMask = LayerMask.NameToLayer("Player");
         attackLayerMask = LayerMask.NameToLayer("Attack");
 	}
+
+    //public abstract float getVerticalVelocity();
+    //public abstract float getMoveVectorX();
+    //public abstract PLAYERSTATE getPlayerState();
+    public abstract void Execute(PlayerAnimator anim, int dir);
 
 	private void OnTriggerEnter(Collider other)
     {
@@ -95,6 +102,13 @@ public class Attack : MonoBehaviour {
         LayerMask attackLayerMask = LayerMask.NameToLayer("Attack");
         return (layermask == attackLayerMask);
 
+    }
+
+    protected IEnumerator ColliderTimeToLive(BoxCollider collider, float ttl)
+    {
+        yield return new WaitForSeconds(ttl);
+        collider.enabled = false;
+        Destroy(gameObject);
     }
 
     //IEnumerator doShengLongBa(DamageObject d)
